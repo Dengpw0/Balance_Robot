@@ -1,43 +1,6 @@
 #include "motorencoder.h" 
 #include "pid.h"
-
-/**
-  * @brief  斜坡函数,使目标输出值缓慢等于期望值
-  * @param  期望最终输出,当前输出,变化速度(越大越快)，不能应用在360度的电机斜坡中
-  * @retval 当前输出
-  * @attention
-  */
-float RAMP_float( float final, float now, float ramp)
-{
-    float buffer = 0;
-
-    buffer = final - now;
-
-    if (buffer > 0)
-    {
-        if (buffer > ramp)
-        {
-            now += ramp;
-        }
-        else
-        {
-            now += buffer;
-        }
-    }
-    else
-    {
-        if (buffer < -ramp)
-        {
-            now += -ramp;
-        }
-        else
-        {
-            now += buffer;
-        }
-    }
-
-    return now;
-}
+#include "led.h"
 
 //外部变量 extern说明改变量已在其它文件定义
 extern int   Encoder, CurrentPosition; //当前速度、当前位置
@@ -51,7 +14,7 @@ extern u16 flag;
 extern PidTypeDef position;
 extern PidTypeDef speed;
 
-
+extern u16 times;
 /**************************************************************************
 函数功能：编码器初始化函数
 入口参数：无
@@ -158,30 +121,36 @@ void TIM2_IRQHandler()
 	{
 	  Encoder=Read_Encoder();   //读取当前编码器读数，即速度
 
-		//速度环
-		SpeeSet = TargetVelocity; //PWM值转换为速度值 76为转换参数;
-		SpeedNow = Encoder*1000*200*0.000120830;
-		PID_Calc(&speed,SpeedNow,SpeeSet);
-		SPEED_PWM = speed.output;		
+//		//速度环
+//		SpeeSet = TargetVelocity; //PWM值转换为速度值 76为转换参数;
+//		SpeedNow = Encoder*1000*200*0.000120830;
+//		PID_Calc(&speed,SpeedNow,SpeeSet);
+//		SPEED_PWM = speed.output;		
+//		//位置环
+//		TargetCircle = SPEED_PWM/2000;	//这个数正常
+//		AngleSet = TargetCircle*1560*1.04/2;
+//		AngleNow += Encoder;
+//		PID_Calc(&position,AngleNow,AngleSet);
+//		POSITION_PWM = position.output;
+		//正常运行闪灯
+		times ++;
+		if((times - 30)>0)
+		{
+			times -= 30;
+			LED1=!LED1;
+		}
+		
 		//位置环
-		TargetCircle = SPEED_PWM/2000;	//这个数正常
 		AngleSet = TargetCircle*1560*1.04/2;
 		AngleNow += Encoder;
 		PID_Calc(&position,AngleNow,AngleSet);
 		POSITION_PWM = position.output;
 		
-		
-//		//位置环
-//		AngleSet = TargetCircle*1560*1.04/2;
-//		AngleNow += Encoder;
-//		PID_Calc(&position,AngleNow,AngleSet);
-//		POSITION_PWM = position.output;
-//		
-//		//速度环
-//		SpeeSet = POSITION_PWM/76; //PWM值转换为速度值 76为转换参数;
-//		SpeedNow = Encoder*1000*200*0.000120830;
-//		PID_Calc(&speed,SpeedNow,SpeeSet);
-//		SPEED_PWM = speed.output;		
+		//速度环
+		SpeeSet = POSITION_PWM/76; //PWM值转换为速度值 76为转换参数;
+		SpeedNow = Encoder*1000*200*0.000120830;
+		PID_Calc(&speed,SpeedNow,SpeeSet);
+		SPEED_PWM = speed.output;		
 
 #if (SPEED==1)
 		SetPWM(SPEED_PWM); //设置PWM
@@ -207,19 +176,19 @@ ControlVelocity代表增量输出
 在我们的速度控制闭环系统里面，只使用PI控制
 ControlVelocity+=Kp[e（k）-e(k-1)]+Ki*e(k)
 **************************************************************************/
-int Velocity_FeedbackControl(int TargetVelocity, int CurrentVelocity)
-{
-		int Bias;  //定义相关变量
-		static int ControlVelocity, Last_bias; //静态变量，函数调用结束后其值依然存在
-		
-		Bias=TargetVelocity-CurrentVelocity; //求速度偏差
-		
-		ControlVelocity+=Velcity_Kp*(Bias-Last_bias)+Velcity_Ki*Bias;  //增量式PI控制器
-                                                                   //Velcity_Kp*(Bias-Last_bias) 作用为限制加速度
-	                                                                 //Velcity_Ki*Bias             速度控制值由Bias不断积分得到 偏差越大加速度越大
-		Last_bias=Bias;	
-		return ControlVelocity; //返回速度控制值
-}
+//int Velocity_FeedbackControl(int TargetVelocity, int CurrentVelocity)
+//{
+//		int Bias;  //定义相关变量
+//		static int ControlVelocity, Last_bias; //静态变量，函数调用结束后其值依然存在
+//		
+//		Bias=TargetVelocity-CurrentVelocity; //求速度偏差
+//		
+//		ControlVelocity+=Velcity_Kp*(Bias-Last_bias)+Velcity_Ki*Bias;  //增量式PI控制器
+//                                                                   //Velcity_Kp*(Bias-Last_bias) 作用为限制加速度
+//	                                                                 //Velcity_Ki*Bias             速度控制值由Bias不断积分得到 偏差越大加速度越大
+//		Last_bias=Bias;	
+//		return ControlVelocity; //返回速度控制值
+//}
 
 /**************************************************************************
 函数功能：位置式PID控制器
@@ -232,27 +201,27 @@ e(k-1)代表上一次的偏差
 ∑e(k)代表e(k)以及之前的偏差的累积和;其中k为1,2,,k;
 pwm代表输出
 **************************************************************************/
-int Position_FeedbackControl(float Circle, int CurrentPosition)
-{
-		float TargetPosition,Bias, ControlVelocity;     //定义相关变量
-		static float Last_bias, Integral_Bias;          //静态变量，函数调用结束后其值依然存在
-		
-	  TargetPosition=Circle*1560*1.04; //目标位置=目标圈数*1040
-	                                   //10ms读取一次编码器(即100HZ)，电机减速比为20，霍尔编码器精度13，AB双相组合得到4倍频，
-	                                   //则转1圈编码器读数为20*13*4=1040，电机转速=Encoder*100/1040r/s 使用定时器2
-	                                   //1.04是误差系数，电机本身存在误差，可根据实际情况调整该系数以提高控制精度
-		Bias=TargetPosition-CurrentPosition; //求位置偏差
-	  Integral_Bias+=Bias;
-    if(Integral_Bias> 970) Integral_Bias= 970;	//积分限幅 防止到达目标位置后过冲
-	  if(Integral_Bias<-970) Integral_Bias=-970;	//积分限幅 防止到达目标位置后过冲
-	
-		ControlVelocity=Position_Kp*Bias+Position_Ki*Integral_Bias+Position_Kd*(Bias-Last_bias);  //增量式PI控制器
-	                                                                                            //Position_Kp*Bias 偏差越大速度越大
-	                                                                                            //Position_Ki*Integral_Bias 减小稳态误差
-	                                                                                            //Position_Kd*(Bias-Last_bias) 限制速度
+//int Position_FeedbackControl(float Circle, int CurrentPosition)
+//{
+//		float TargetPosition,Bias, ControlVelocity;     //定义相关变量
+//		static float Last_bias, Integral_Bias;          //静态变量，函数调用结束后其值依然存在
+//		
+//	  TargetPosition=Circle*1560*1.04; //目标位置=目标圈数*1040
+//	                                   //10ms读取一次编码器(即100HZ)，电机减速比为20，霍尔编码器精度13，AB双相组合得到4倍频，
+//	                                   //则转1圈编码器读数为20*13*4=1040，电机转速=Encoder*100/1040r/s 使用定时器2
+//	                                   //1.04是误差系数，电机本身存在误差，可根据实际情况调整该系数以提高控制精度
+//		Bias=TargetPosition-CurrentPosition; //求位置偏差
+//	  Integral_Bias+=Bias;
+//    if(Integral_Bias> 970) Integral_Bias= 970;	//积分限幅 防止到达目标位置后过冲
+//	  if(Integral_Bias<-970) Integral_Bias=-970;	//积分限幅 防止到达目标位置后过冲
+//	
+//		ControlVelocity=Position_Kp*Bias+Position_Ki*Integral_Bias+Position_Kd*(Bias-Last_bias);  //增量式PI控制器
+//	                                                                                            //Position_Kp*Bias 偏差越大速度越大
+//	                                                                                            //Position_Ki*Integral_Bias 减小稳态误差
+//	                                                                                            //Position_Kd*(Bias-Last_bias) 限制速度
 
-		Last_bias=Bias;	
-		return ControlVelocity;    //返回速度控制值 
-}
+//		Last_bias=Bias;	
+//		return ControlVelocity;    //返回速度控制值 
+//}
 
 

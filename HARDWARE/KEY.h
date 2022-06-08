@@ -3,7 +3,8 @@
 #include "sys.h"
 #include "stm32f10x_gpio.h" 
 
-#define KEY GPIO_ReadInputDataBit(GPIOA,GPIO_Pin_5)//宏定义KEY为读取按键状态，宏定义可以提高程序可读性
+#define KEY1 GPIO_ReadInputDataBit(GPIOC,GPIO_Pin_13)//宏定义KEY为读取按键状态，宏定义可以提高程序可读性
+#define KEY2 GPIO_ReadInputDataBit(GPIOE,GPIO_Pin_0)//宏定义KEY为读取按键状态，宏定义可以提高程序可读性
 //#define KEY PAin(5) //引用sys.h头文件后，可以直接使用PAin(5)读取按键状态
 
 void KEY_Init(void);    //KEY键初始化

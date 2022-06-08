@@ -36,3 +36,4 @@
 ..\obj\motorencoder.o: D:\.keilv5\ARM\ARMCC\Bin\..\include\math.h
 ..\obj\motorencoder.o: ..\HARDWARE\TB6612.h
 ..\obj\motorencoder.o: ..\HARDWARE\pid.h
+..\obj\motorencoder.o: ..\HARDWARE\led.h

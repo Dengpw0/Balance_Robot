@@ -22,17 +22,12 @@ Allrightsreserved
 #include "pid.h"
 
 int   TargetVelocity=300,  CurrentPosition, Encoder,SPEED_PWM,POSITION_PWM;  //目标速度、目标圈数(位置)、编码器读数、PWM控制变量
+
 float TargetCircle=1;		//float类型转的花样多点，也不用去改那个脉冲
-float Velcity_Kp=20,  Velcity_Ki=5,  Velcity_Kd; //相关速度PID参数
-//float Position_Kp=120, Position_Ki=0.1, Position_Kd=400; //相关位置PID参数
-float Position_Kp=120, Position_Ki=0.1, Position_Kd=400; //相关位置PID参数
+
 int   MortorRun = 0;  //允许电机控制标志位
 
-u16 adc_value;
-u16 adc_valueleft;
-u16 adc_valueright;
-u16 adc_sw;
-float tmpvalue;
+
 float orignposition;
 
 u16 flag = 0;
@@ -56,6 +51,9 @@ int seeSpeeSet;
 int seeSpeedNow;
 float SpeeSet;
 float SpeedNow;
+
+u8 key_value;
+u8 usart_value;
 /**************************************************************************
 函数功能：主函数
 入口参数：无
@@ -66,7 +64,8 @@ int main(void)
 	 NVIC_PriorityGroupConfig(NVIC_PriorityGroup_2); //中断优先级分组
 	 delay_init();                //延迟函数初始化
 	 LED_Init();                  //LED灯初始化
-   //uart_init(9600);           //串口初始化	 
+	 KEY_Init();									//KEY按键初始化
+   uart_init(9600);             //USART蓝牙串口初始化	 
    MotorEncoder_Init();	        //编码器初始化 使用定时器4
    TB6612_Init(7199, 0);        //电机驱动外设初始化 使用定时器3 
 	 EncoderRead_TIM2(7199, 99);  //10ms读取一次编码器(即100HZ)，电机减速比为20，霍尔编码器精度13，AB双相组合得到4倍频，
@@ -78,6 +77,26 @@ int main(void)
 //	 while(1)
 		for(;;)
 	  {
+			key_value = KEY_Scan();
+			
+			if(key_value==1)
+				LED2=1;
+			if(key_value==2)
+				LED2=0;
+			
+			switch(usart_value)
+			{
+				case 1:
+					LED2=1;
+					break;
+				case 2:
+					LED2=0;
+					break;
+				default:
+					break;
+			}
+			//正常运行小灯
+//			 GPIO_SetBits(GPIOD,GPIO_Pin_13);
 			 seeAngleSet = AngleSet;
 			 seeAngleNow = AngleNow;
 
