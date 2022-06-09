@@ -1,10 +1,11 @@
 #include "motorencoder.h" 
 #include "pid.h"
 #include "led.h"
+#include "main.h"
 
 //外部变量 extern说明改变量已在其它文件定义
 extern int   Encoder, CurrentPosition; //当前速度、当前位置
-extern int   TargetVelocity, CurrentPosition, Encoder,SPEED_PWM,POSITION_PWM;//目标速度、目标圈数、编码器读数、PWM控制变量
+extern int   TargetVelocity, CurrentPosition, EncoderLeft,EncoderRight,PWM_left,PWM_right;//目标速度、目标圈数、编码器读数、PWM控制变量
 extern float TargetCircle,AngleNow,AngleSet,SpeeSet,SpeedNow,AngleMax,k,AngleMin;
 extern float Velcity_Kp,  Velcity_Ki,  Velcity_Kd; //相关速度PID参数
 extern float Position_Kp, Position_Ki, Position_Kd; //相关位置PID参数
@@ -20,7 +21,7 @@ extern u16 times;
 入口参数：无
 返回  值：无
 **************************************************************************/
-void MotorEncoder_Init(void)
+void MotorEncoderLeft_Init(void)
 {
 	GPIO_InitTypeDef GPIO_InitStructure; //定义一个引脚初始化的结构体  
 	TIM_TimeBaseInitTypeDef TIM_TimeBaseStructure;//定义一个定时器初始化的结构体
@@ -50,20 +51,68 @@ void MotorEncoder_Init(void)
 	
 	TIM_Cmd(TIM4, ENABLE); //使能定时器4
 }
+/**************************************************************************
+函数功能：编码器初始化函数
+入口参数：无
+返回  值：无
+**************************************************************************/
+void MotorEncoderRight_Init(void)
+{
+	GPIO_InitTypeDef GPIO_InitStructure; //定义一个引脚初始化的结构体  
+	TIM_TimeBaseInitTypeDef TIM_TimeBaseStructure;//定义一个定时器初始化的结构体
+  TIM_ICInitTypeDef TIM_ICInitStructure; //定义一个定时器编码器模式初始化的结构体
+	
+	RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM5, ENABLE); //使能TIM5时钟
+	RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA, ENABLE); //使能CPIOA时钟
+ 
+	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_1|GPIO_Pin_0;	//TIM5_CH2、TIM5_CH3
+	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IN_FLOATING; //浮空输入
+	GPIO_Init(GPIOA, &GPIO_InitStructure);	//根据GPIO_InitStructure的参数初始化GPIO
+
+	TIM_TimeBaseStructure.TIM_Period = 0xffff; //设定计数器自动重装值
+	TIM_TimeBaseStructure.TIM_Prescaler = 0; // 预分频器 
+	TIM_TimeBaseStructure.TIM_ClockDivision = TIM_CKD_DIV1; //选择时钟分频：不分频
+	TIM_TimeBaseStructure.TIM_CounterMode = TIM_CounterMode_Up; //TIM向上计数模式
+	TIM_TimeBaseInit(TIM5, &TIM_TimeBaseStructure); //根据TIM_TimeBaseInitStruct的参数初始化定时器TIM4
+	
+  TIM_EncoderInterfaceConfig(TIM5, TIM_EncoderMode_TI12, TIM_ICPolarity_Rising, TIM_ICPolarity_Rising); //使用编码器模式3：CH1、CH2同时计数，为四分频
+  TIM_ICStructInit(&TIM_ICInitStructure); //把TIM_ICInitStruct 中的每一个参数按缺省值填入
+	TIM_ICInitStructure.TIM_ICFilter = 10;  //设置滤波器长度
+  TIM_ICInit(TIM5, &TIM_ICInitStructure); //根TIM_ICInitStructure参数初始化定时器TIM4编码器模式
+	
+	TIM_ClearFlag(TIM5, TIM_FLAG_Update);//清除TIM的更新标志位
+  TIM_ITConfig(TIM5, TIM_IT_Update, ENABLE); //更新中断使能
+  TIM_SetCounter(TIM5,0); //初始化清空编码器数值
+	
+	TIM_Cmd(TIM5, ENABLE); //使能定时器4
+}
 
 /**************************************************************************
 函数功能：读取TIM4编码器数值
 入口参数：无
 返回  值：无
 **************************************************************************/
-int Read_Encoder(void)
+int Read_Encoder(int left_or_right)
 {
 	int Encoder_TIM;
-	Encoder_TIM=TIM4->CNT; //读取计数
-	if(Encoder_TIM>0xefff)Encoder_TIM=Encoder_TIM-0xffff; //转化计数值为有方向的值，大于0正转，小于0反转。
-	                                                      //TIM4->CNT范围为0-0xffff，初值为0。
-	TIM4->CNT=0; //读取完后计数清零
-	return Encoder_TIM; //返回值
+	switch(left_or_right)
+	{
+		case 1:
+			Encoder_TIM=TIM4->CNT; //读取计数
+			if(Encoder_TIM>0xefff)Encoder_TIM=Encoder_TIM-0xffff; //转化计数值为有方向的值，大于0正转，小于0反转。
+																														//TIM4->CNT范围为0-0xffff，初值为0。
+			TIM4->CNT=0; //读取完后计数清零
+			return Encoder_TIM; //返回值
+			break;
+		case 0:
+			Encoder_TIM=TIM5->CNT; //读取计数
+			if(Encoder_TIM>0xefff)Encoder_TIM=Encoder_TIM-0xffff; //转化计数值为有方向的值，大于0正转，小于0反转。
+																														//TIM4->CNT范围为0-0xffff，初值为0。
+			TIM5->CNT=0; //读取完后计数清零
+			return Encoder_TIM; //返回值
+			break;
+	}
+	
 }
 
 /**************************************************************************
@@ -113,13 +162,14 @@ void EncoderRead_TIM2(u16 arr, u16 psc)
 入口参数：无
 返回  值：无
 **************************************************************************/
-#define SPEED 0
-#define POSITION 1
+#define SPEED 1
+#define POSITION 0
 void TIM2_IRQHandler()
 {
   if(TIM_GetITStatus(TIM2, TIM_IT_Update)==1) //当发生中断时状态寄存器(TIMx_SR)的bit0会被硬件置1
 	{
-	  Encoder=Read_Encoder();   //读取当前编码器读数，即速度
+	   EncoderLeft=Read_Encoder(1);   //读取当前编码器读数，即速度
+		 EncoderRight=Read_Encoder(0);   //读取当前编码器读数，即速度
 
 //		//速度环
 //		SpeeSet = TargetVelocity; //PWM值转换为速度值 76为转换参数;
@@ -140,20 +190,53 @@ void TIM2_IRQHandler()
 			LED1=!LED1;
 		}
 		
-		//位置环
-		AngleSet = TargetCircle*1560*1.04/2;
-		AngleNow += Encoder;
-		PID_Calc(&position,AngleNow,AngleSet);
-		POSITION_PWM = position.output;
+		
+//		//位置环
+//		AngleSet = TargetCircle*1560*1.04/2;
+//		AngleNow += Encoder;
+//		PID_Calc(&position,AngleNow,AngleSet);
+//		POSITION_PWM = position.output;
+//		
+//		//速度环
+//		SpeeSet = POSITION_PWM/76; //PWM值转换为速度值 76为转换参数;
+//		SpeedNow = Encoder*1000*200*0.000120830;
+//		PID_Calc(&speed,SpeedNow,SpeeSet);
+//		SPEED_PWM = speed.output;		
+		 //位置环
+		 motor[LEFT].position.PositionSet = TargetCircle*1560*1.04/2;
+		 motor[RIGHT].position.PositionSet = TargetCircle*1560*1.04/2;
+		
+		 motor[LEFT].position.PositionNow += EncoderLeft;
+		 motor[RIGHT].position.PositionNow += EncoderRight;
+		 
+		 
+		 PID_Calc(&motor[LEFT].position.position_pid,motor[LEFT].position.PositionNow,motor[LEFT].position.PositionSet);
+		 PID_Calc(&motor[RIGHT].position.position_pid,motor[RIGHT].position.PositionNow,motor[RIGHT].position.PositionSet);
+		 
+		 motor[LEFT].position.PWM = motor[LEFT].position.position_pid.output;
+		 motor[RIGHT].position.PWM = motor[RIGHT].position.position_pid.output;
+		
+		
 		
 		//速度环
-		SpeeSet = POSITION_PWM/76; //PWM值转换为速度值 76为转换参数;
-		SpeedNow = Encoder*1000*200*0.000120830;
-		PID_Calc(&speed,SpeedNow,SpeeSet);
-		SPEED_PWM = speed.output;		
+		 motor[LEFT].speed.SpeedSet = motor[LEFT].position.PWM/76;	//TargetVelocity;//
+		 motor[RIGHT].speed.SpeedSet = motor[RIGHT].position.PWM/76;	//TargetVelocity;//
+		
+		 motor[LEFT].speed.SpeedNow = EncoderLeft*1000*200*0.000120830;
+		 motor[RIGHT].speed.SpeedNow = EncoderRight*1000*200*0.000120830;
+		 
+//		 motor[LEFT].speed.seeSpeedSet =  motor[LEFT].speed.SpeedSet;
+//		 motor[RIGHT].speed.seeSpeedSet =  motor[RIGHT].speed.SpeedSet;
+		 
+		 PID_Calc(&motor[LEFT].speed.speed_pid,motor[LEFT].speed.SpeedNow,motor[LEFT].speed.SpeedSet);
+		 PID_Calc(&motor[RIGHT].speed.speed_pid,motor[RIGHT].speed.SpeedNow,motor[RIGHT].speed.SpeedSet);
+		 
+		 motor[LEFT].speed.PWM = motor[LEFT].speed.speed_pid.output;
+		 motor[RIGHT].speed.PWM = motor[RIGHT].speed.speed_pid.output;
+		 
 
 #if (SPEED==1)
-		SetPWM(SPEED_PWM); //设置PWM
+		SetPWM(motor[LEFT].speed.PWM, motor[RIGHT].speed.PWM); //设置PWM
 #endif
 		
 #if (POSITION==1)

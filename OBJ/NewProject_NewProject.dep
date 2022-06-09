@@ -1,5 +1,5 @@
 Dependencies for Project 'NewProject', Target 'NewProject': (DO NOT MODIFY !)
-F (.\main.c)(0x62A02555)(--c99 --gnu -c --cpu Cortex-M3 -g -O0 --apcs=interwork --split_sections -I ..\USER -I ..\CORE -I ..\STM32F10x_FWLib\inc -I ..\SYSTEM\delay -I ..\SYSTEM\sys -I ..\SYSTEM\usart -I ..\HARDWARE -I ..\HARDWARE\MPU6050 -I ..\HARDWARE\ADC -I ..\RTT -I ..\HARDWARE\AS5600-I.\RTE\_NewProject-ID:\.keilv5\Keil\STM32F1xx_DFP\2.4.0\Device\Include-ID:\.keilv5\ARM\CMSIS\Include-D__UVISION_VERSION="528" -DSTM32F10X_HD -DSTM32F10X_HD -DUSE_STDPERIPH_DRIVER-o ..\obj\main.o --omf_browse ..\obj\main.crf --depend ..\obj\main.d)
+F (.\main.c)(0x62A1C998)(--c99 --gnu -c --cpu Cortex-M3 -g -O0 --apcs=interwork --split_sections -I ..\USER -I ..\CORE -I ..\STM32F10x_FWLib\inc -I ..\SYSTEM\delay -I ..\SYSTEM\sys -I ..\SYSTEM\usart -I ..\HARDWARE -I ..\HARDWARE\MPU6050 -I ..\HARDWARE\ADC -I ..\RTT -I ..\HARDWARE\AS5600-I.\RTE\_NewProject-ID:\.keilv5\Keil\STM32F1xx_DFP\2.4.0\Device\Include-ID:\.keilv5\ARM\CMSIS\Include-D__UVISION_VERSION="528" -DSTM32F10X_HD -DSTM32F10X_HD -DUSE_STDPERIPH_DRIVER-o ..\obj\main.o --omf_browse ..\obj\main.crf --depend ..\obj\main.d)
 I (..\SYSTEM\delay\delay.h)(0x5E8D3E6E)
 I (..\SYSTEM\sys\sys.h)(0x5EFAD89C)
 I (..\USER\stm32f10x.h)(0x4D783CB4)
@@ -35,14 +35,15 @@ I (D:\.keilv5\ARM\ARMCC\include\stdio.h)(0x61A5AA09)
 I (D:\.keilv5\ARM\ARMCC\include\stdlib.h)(0x61A5AAD2)
 I (D:\.keilv5\ARM\ARMCC\include\math.h)(0x5CEB79D6)
 I (..\SYSTEM\usart\usart.h)(0x5E8D3EB3)
-I (..\HARDWARE\TB6612.h)(0x5EF861A0)
-I (..\HARDWARE\motorencoder.h)(0x5EFDAF72)
+I (..\HARDWARE\TB6612.h)(0x62A1C6FE)
+I (..\HARDWARE\motorencoder.h)(0x62A1C6FE)
 I (..\HARDWARE\led.h)(0x62A01B05)
 I (..\HARDWARE\oled.h)(0x5D5E42D5)
 I (..\HARDWARE\key.h)(0x62A02179)
 I (..\RTT\SEGGER_RTT.h)(0x58B4654B)
 I (..\RTT\SEGGER_RTT_Conf.h)(0x58B4654B)
 I (..\HARDWARE\pid.h)(0x629E048D)
+I (main.h)(0x62A1C6FE)
 F (.\stm32f10x_it.c)(0x4EBEACB0)(--c99 --gnu -c --cpu Cortex-M3 -g -O0 --apcs=interwork --split_sections -I ..\USER -I ..\CORE -I ..\STM32F10x_FWLib\inc -I ..\SYSTEM\delay -I ..\SYSTEM\sys -I ..\SYSTEM\usart -I ..\HARDWARE -I ..\HARDWARE\MPU6050 -I ..\HARDWARE\ADC -I ..\RTT -I ..\HARDWARE\AS5600-I.\RTE\_NewProject-ID:\.keilv5\Keil\STM32F1xx_DFP\2.4.0\Device\Include-ID:\.keilv5\ARM\CMSIS\Include-D__UVISION_VERSION="528" -DSTM32F10X_HD -DSTM32F10X_HD -DUSE_STDPERIPH_DRIVER-o ..\obj\stm32f10x_it.o --omf_browse ..\obj\stm32f10x_it.crf --depend ..\obj\stm32f10x_it.d)
 I (stm32f10x_it.h)(0x4D99A426)
 I (stm32f10x.h)(0x4D783CB4)
@@ -879,8 +880,8 @@ I (D:\.keilv5\ARM\ARMCC\include\stdio.h)(0x61A5AA09)
 I (D:\.keilv5\ARM\ARMCC\include\stdlib.h)(0x61A5AAD2)
 I (D:\.keilv5\ARM\ARMCC\include\math.h)(0x5CEB79D6)
 I (..\SYSTEM\usart\usart.h)(0x5E8D3EB3)
-F (..\HARDWARE\TB6612.c)(0x5EFAD2C9)(--c99 --gnu -c --cpu Cortex-M3 -g -O0 --apcs=interwork --split_sections -I ..\USER -I ..\CORE -I ..\STM32F10x_FWLib\inc -I ..\SYSTEM\delay -I ..\SYSTEM\sys -I ..\SYSTEM\usart -I ..\HARDWARE -I ..\HARDWARE\MPU6050 -I ..\HARDWARE\ADC -I ..\RTT -I ..\HARDWARE\AS5600-I.\RTE\_NewProject-ID:\.keilv5\Keil\STM32F1xx_DFP\2.4.0\Device\Include-ID:\.keilv5\ARM\CMSIS\Include-D__UVISION_VERSION="528" -DSTM32F10X_HD -DSTM32F10X_HD -DUSE_STDPERIPH_DRIVER-o ..\obj\tb6612.o --omf_browse ..\obj\tb6612.crf --depend ..\obj\tb6612.d)
-I (..\HARDWARE\TB6612.h)(0x5EF861A0)
+F (..\HARDWARE\TB6612.c)(0x62A1C6FE)(--c99 --gnu -c --cpu Cortex-M3 -g -O0 --apcs=interwork --split_sections -I ..\USER -I ..\CORE -I ..\STM32F10x_FWLib\inc -I ..\SYSTEM\delay -I ..\SYSTEM\sys -I ..\SYSTEM\usart -I ..\HARDWARE -I ..\HARDWARE\MPU6050 -I ..\HARDWARE\ADC -I ..\RTT -I ..\HARDWARE\AS5600-I.\RTE\_NewProject-ID:\.keilv5\Keil\STM32F1xx_DFP\2.4.0\Device\Include-ID:\.keilv5\ARM\CMSIS\Include-D__UVISION_VERSION="528" -DSTM32F10X_HD -DSTM32F10X_HD -DUSE_STDPERIPH_DRIVER-o ..\obj\tb6612.o --omf_browse ..\obj\tb6612.crf --depend ..\obj\tb6612.d)
+I (..\HARDWARE\TB6612.h)(0x62A1C6FE)
 I (..\SYSTEM\sys\sys.h)(0x5EFAD89C)
 I (..\USER\stm32f10x.h)(0x4D783CB4)
 I (..\CORE\core_cm3.h)(0x4D523B58)
@@ -944,8 +945,8 @@ I (..\STM32F10x_FWLib\inc\stm32f10x_tim.h)(0x4D783BB4)
 I (..\STM32F10x_FWLib\inc\stm32f10x_usart.h)(0x504F415E)
 I (..\STM32F10x_FWLib\inc\stm32f10x_wwdg.h)(0x4D783BB4)
 I (..\STM32F10x_FWLib\inc\misc.h)(0x4D783BB4)
-F (..\HARDWARE\MotorEncoder.c)(0x62A0242B)(--c99 --gnu -c --cpu Cortex-M3 -g -O0 --apcs=interwork --split_sections -I ..\USER -I ..\CORE -I ..\STM32F10x_FWLib\inc -I ..\SYSTEM\delay -I ..\SYSTEM\sys -I ..\SYSTEM\usart -I ..\HARDWARE -I ..\HARDWARE\MPU6050 -I ..\HARDWARE\ADC -I ..\RTT -I ..\HARDWARE\AS5600-I.\RTE\_NewProject-ID:\.keilv5\Keil\STM32F1xx_DFP\2.4.0\Device\Include-ID:\.keilv5\ARM\CMSIS\Include-D__UVISION_VERSION="528" -DSTM32F10X_HD -DSTM32F10X_HD -DUSE_STDPERIPH_DRIVER-o ..\obj\motorencoder.o --omf_browse ..\obj\motorencoder.crf --depend ..\obj\motorencoder.d)
-I (..\HARDWARE\motorencoder.h)(0x5EFDAF72)
+F (..\HARDWARE\MotorEncoder.c)(0x62A1CAF0)(--c99 --gnu -c --cpu Cortex-M3 -g -O0 --apcs=interwork --split_sections -I ..\USER -I ..\CORE -I ..\STM32F10x_FWLib\inc -I ..\SYSTEM\delay -I ..\SYSTEM\sys -I ..\SYSTEM\usart -I ..\HARDWARE -I ..\HARDWARE\MPU6050 -I ..\HARDWARE\ADC -I ..\RTT -I ..\HARDWARE\AS5600-I.\RTE\_NewProject-ID:\.keilv5\Keil\STM32F1xx_DFP\2.4.0\Device\Include-ID:\.keilv5\ARM\CMSIS\Include-D__UVISION_VERSION="528" -DSTM32F10X_HD -DSTM32F10X_HD -DUSE_STDPERIPH_DRIVER-o ..\obj\motorencoder.o --omf_browse ..\obj\motorencoder.crf --depend ..\obj\motorencoder.d)
+I (..\HARDWARE\motorencoder.h)(0x62A1C6FE)
 I (..\SYSTEM\sys\sys.h)(0x5EFAD89C)
 I (..\USER\stm32f10x.h)(0x4D783CB4)
 I (..\CORE\core_cm3.h)(0x4D523B58)
@@ -979,9 +980,10 @@ I (D:\.keilv5\ARM\ARMCC\include\string.h)(0x5CEB79E2)
 I (D:\.keilv5\ARM\ARMCC\include\stdio.h)(0x61A5AA09)
 I (D:\.keilv5\ARM\ARMCC\include\stdlib.h)(0x61A5AAD2)
 I (D:\.keilv5\ARM\ARMCC\include\math.h)(0x5CEB79D6)
-I (..\HARDWARE\TB6612.h)(0x5EF861A0)
+I (..\HARDWARE\TB6612.h)(0x62A1C6FE)
 I (..\HARDWARE\pid.h)(0x629E048D)
 I (..\HARDWARE\led.h)(0x62A01B05)
+I (..\USER\main.h)(0x62A1C6FE)
 F (..\HARDWARE\usart3.c)(0x5EF85C49)(--c99 --gnu -c --cpu Cortex-M3 -g -O0 --apcs=interwork --split_sections -I ..\USER -I ..\CORE -I ..\STM32F10x_FWLib\inc -I ..\SYSTEM\delay -I ..\SYSTEM\sys -I ..\SYSTEM\usart -I ..\HARDWARE -I ..\HARDWARE\MPU6050 -I ..\HARDWARE\ADC -I ..\RTT -I ..\HARDWARE\AS5600-I.\RTE\_NewProject-ID:\.keilv5\Keil\STM32F1xx_DFP\2.4.0\Device\Include-ID:\.keilv5\ARM\CMSIS\Include-D__UVISION_VERSION="528" -DSTM32F10X_HD -DSTM32F10X_HD -DUSE_STDPERIPH_DRIVER-o ..\obj\usart3.o --omf_browse ..\obj\usart3.crf --depend ..\obj\usart3.d)
 I (..\HARDWARE\usart3.h)(0x5705AF85)
 I (..\SYSTEM\sys\sys.h)(0x5EFAD89C)

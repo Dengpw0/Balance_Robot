@@ -43,3 +43,4 @@
 ..\obj\main.o: ..\RTT\SEGGER_RTT.h
 ..\obj\main.o: ..\RTT\SEGGER_RTT_Conf.h
 ..\obj\main.o: ..\HARDWARE\pid.h
+..\obj\main.o: main.h

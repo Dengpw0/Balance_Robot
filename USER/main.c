@@ -20,8 +20,9 @@ Allrightsreserved
 #include "key.h"
 #include "SEGGER_RTT.h"
 #include "pid.h"
+#include "main.h"
 
-int   TargetVelocity=300,  CurrentPosition, Encoder,SPEED_PWM,POSITION_PWM;  //目标速度、目标圈数(位置)、编码器读数、PWM控制变量
+int   TargetVelocity=100,  CurrentPosition, EncoderLeft,EncoderRight,PWM_left,PWM_right;  //目标速度、目标圈数(位置)、编码器读数、PWM控制变量
 
 float TargetCircle=1;		//float类型转的花样多点，也不用去改那个脉冲
 
@@ -54,6 +55,8 @@ float SpeedNow;
 
 u8 key_value;
 u8 usart_value;
+
+motor_control motor[2];
 /**************************************************************************
 函数功能：主函数
 入口参数：无
@@ -66,12 +69,16 @@ int main(void)
 	 LED_Init();                  //LED灯初始化
 	 KEY_Init();									//KEY按键初始化
    uart_init(9600);             //USART蓝牙串口初始化	 
-   MotorEncoder_Init();	        //编码器初始化 使用定时器4
+   MotorEncoderLeft_Init();	    //编码器初始化 使用定时器4
+	 MotorEncoderRight_Init();		//编码器初始化 使用定时器5
    TB6612_Init(7199, 0);        //电机驱动外设初始化 使用定时器3 
 	 EncoderRead_TIM2(7199, 99);  //10ms读取一次编码器(即100HZ)，电机减速比为20，霍尔编码器精度13，AB双相组合得到4倍频，
 	                              //则转1圈编码器读数为20*13*4=1040，电机转速=Encoder*100/1040r/s 使用定时器2
-		PIDInit(&position,420,0,600,0,6000, 0, 20, 3600, 30 * 19 * 4, 970, POSITION_360);
-	 PIDInit(&speed,60,0.1,0.5,0,6500, 0, 250, 40 * 19, 30 * 19 * 2, 1350, SPEED);
+		PIDInit(&motor[LEFT].position.position_pid,420,0,600,0,6000, 0, 20, 3600, 30 * 19 * 4, 970, POSITION_360);
+	 PIDInit(&motor[RIGHT].position.position_pid,420,0,600,0,6000, 0, 20, 3600, 30 * 19 * 4, 970, POSITION_360);
+	 PIDInit(&motor[LEFT].speed.speed_pid,60,0.1,0.5,0,6500, 0, 250, 40 * 19, 30 * 19 * 2, 1350, SPEED);
+	 PIDInit(&motor[RIGHT].speed.speed_pid,60,0.1,0.5,0,6500, 0, 250, 40 * 19, 30 * 19 * 2, 1350, SPEED);
+	
 	 delay_ms(200);              //延迟等待初始化完成
 	 orignposition = TargetCircle;
 //	 while(1)

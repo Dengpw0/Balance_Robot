@@ -15,15 +15,15 @@ void TB6612_Init(int arr, int psc)
 	RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM3, ENABLE); //使能通用定时器3时钟
 	
 	//TB6612控制方向引脚
-	GPIO_InitStructure.GPIO_Pin=GPIO_Pin_12|GPIO_Pin_13; 
+	GPIO_InitStructure.GPIO_Pin=GPIO_Pin_12|GPIO_Pin_13|GPIO_Pin_14|GPIO_Pin_15; 
 	GPIO_InitStructure.GPIO_Mode=GPIO_Mode_Out_PP; //引脚输入输出模式为推挽输出模式
 	GPIO_InitStructure.GPIO_Speed=GPIO_Speed_50MHz; //引脚输出速度为50MHZ
 	GPIO_Init(GPIOB, &GPIO_InitStructure); //根据上面设置好的GPIO_InitStructure参数，初始化引脚
 	
-	GPIO_ResetBits(GPIOB, GPIO_Pin_12|GPIO_Pin_13); //初始化设置引脚低电平
+	GPIO_ResetBits(GPIOB, GPIO_Pin_12|GPIO_Pin_13|GPIO_Pin_14|GPIO_Pin_15); //初始化设置引脚低电平
 
 	//TB6612PWM输出引脚
-	GPIO_InitStructure.GPIO_Pin=GPIO_Pin_1;//引脚0
+	GPIO_InitStructure.GPIO_Pin=GPIO_Pin_1 | GPIO_Pin_0;//引脚0
 	GPIO_InitStructure.GPIO_Mode=GPIO_Mode_AF_PP; //复用推挽输出模式，定时器功能为B1引脚复用功能
 	GPIO_InitStructure.GPIO_Speed=GPIO_Speed_50MHz; //定义该引脚输出速度为50MHZ
   GPIO_Init(GPIOB, &GPIO_InitStructure); //初始化引脚GPIOB1
@@ -38,10 +38,11 @@ void TB6612_Init(int arr, int psc)
 	TIM_OCInitTypeStrue.TIM_OCPolarity=TIM_OCNPolarity_High; //输出有效电平为高电平
 	TIM_OCInitTypeStrue.TIM_OutputState=TIM_OutputState_Enable; //使能PWM输出
 	TIM_OCInitTypeStrue.TIM_Pulse = 0; //设置待装入捕获比较寄存器的脉冲值
+	TIM_OC3Init(TIM3, &TIM_OCInitTypeStrue); //根TIM_OCInitTypeStrue参数初始化定时器3通道3
 	TIM_OC4Init(TIM3, &TIM_OCInitTypeStrue); //根TIM_OCInitTypeStrue参数初始化定时器3通道4
 
   //TIM_CtrlPWMOutputs(TIM3,ENABLE);	//MOE 主输出使能
-
+	TIM_OC3PreloadConfig(TIM3, TIM_OCPreload_Disable); //CH3预装载使能  使能后改变TIM_Pulse(即PWM)的值立刻生效，不使能则下个周期生效
 	TIM_OC4PreloadConfig(TIM3, TIM_OCPreload_Disable); //CH4预装载使能  使能后改变TIM_Pulse(即PWM)的值立刻生效，不使能则下个周期生效
 	
 	TIM_ARRPreloadConfig(TIM3, ENABLE); //TIM3预装载使能
@@ -54,21 +55,35 @@ void TB6612_Init(int arr, int psc)
 入口参数：PWM值
 返回  值：无
 **************************************************************************/
-void SetPWM(int pwm)
+void SetPWM(int pwmleft,int pwmright)
 {
-  if(pwm>=0)//pwm>=0 (BIN1, BIN2)=(0, 1) 正转
+  if(pwmleft>=0)//pwm>=0 (BIN1, BIN2)=(0, 1) 正转
   {
 		PBout(13)=0; //BIN1=0
 		PBout(12)=1; //BIN2=1
-		TIM3->CCR4=pwm;
-		TIM_SetCompare4(TIM3, pwm);
+		TIM3->CCR4=pwmleft;
+		TIM_SetCompare4(TIM3, pwmleft);
   }
-  else if(pwm<0)//pwm<0 (BIN1, BIN2)=(1, 0) 反转
+  else if(pwmleft<0)//pwm<0 (BIN1, BIN2)=(1, 0) 反转
   {
 		PBout(13)=1; //BIN1=1
 		PBout(12)=0; //BIN2=0
-		TIM3->CCR4=-pwm;
-		TIM_SetCompare4(TIM3, -pwm);
+		TIM3->CCR4=-pwmleft;
+		TIM_SetCompare4(TIM3, -pwmleft);
+  }
+	if(pwmright>=0)//pwm>=0 (BIN1, BIN2)=(0, 1) 正转
+  {
+		PBout(15)=1; //BIN1=0
+		PBout(14)=0; //BIN2=1
+		TIM3->CCR3=pwmright;
+		TIM_SetCompare3(TIM3, pwmright);
+  }
+  else if(pwmright<0)//pwm<0 (BIN1, BIN2)=(1, 0) 反转
+  {
+		PBout(15)=0; //BIN1=1
+		PBout(14)=1; //BIN2=0
+		TIM3->CCR3=-pwmright;
+		TIM_SetCompare3(TIM3, -pwmright);
   }
 }
 

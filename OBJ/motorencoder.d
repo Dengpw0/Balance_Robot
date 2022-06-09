@@ -37,3 +37,4 @@
 ..\obj\motorencoder.o: ..\HARDWARE\TB6612.h
 ..\obj\motorencoder.o: ..\HARDWARE\pid.h
 ..\obj\motorencoder.o: ..\HARDWARE\led.h
+..\obj\motorencoder.o: ..\USER\main.h
