@@ -38,9 +38,14 @@
 ..\obj\main.o: ..\HARDWARE\TB6612.h
 ..\obj\main.o: ..\HARDWARE\motorencoder.h
 ..\obj\main.o: ..\HARDWARE\led.h
-..\obj\main.o: ..\HARDWARE\oled.h
 ..\obj\main.o: ..\HARDWARE\key.h
 ..\obj\main.o: ..\RTT\SEGGER_RTT.h
 ..\obj\main.o: ..\RTT\SEGGER_RTT_Conf.h
 ..\obj\main.o: ..\HARDWARE\pid.h
 ..\obj\main.o: main.h
+..\obj\main.o: ..\HARDWARE\OLED\oled.h
+..\obj\main.o: ..\HARDWARE\OLED\bmp.h
+..\obj\main.o: ..\HARDWARE\MPU6050\mpu6050.h
+..\obj\main.o: ..\HARDWARE\MPU6050\mpuiic.h
+..\obj\main.o: ..\HARDWARE\MPU6050\eMPL\inv_mpu.h
+..\obj\main.o: ..\HARDWARE\MPU6050\eMPL\inv_mpu_dmp_motion_driver.h

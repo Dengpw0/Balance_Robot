@@ -103,16 +103,14 @@ int Read_Encoder(int left_or_right)
 																														//TIM4->CNT范围为0-0xffff，初值为0。
 			TIM4->CNT=0; //读取完后计数清零
 			return Encoder_TIM; //返回值
-			break;
 		case 0:
 			Encoder_TIM=TIM5->CNT; //读取计数
 			if(Encoder_TIM>0xefff)Encoder_TIM=Encoder_TIM-0xffff; //转化计数值为有方向的值，大于0正转，小于0反转。
 																														//TIM4->CNT范围为0-0xffff，初值为0。
 			TIM5->CNT=0; //读取完后计数清零
 			return Encoder_TIM; //返回值
-			break;
 	}
-	
+	return 0;
 }
 
 /**************************************************************************

@@ -34,11 +34,15 @@
 "..\obj\led.o"
 "..\obj\motorencoder.o"
 "..\obj\usart3.o"
-"..\obj\oled.o"
 "..\obj\key.o"
 "..\obj\segger_rtt.o"
 "..\obj\segger_rtt_printf.o"
 "..\obj\pid.o"
+"..\obj\oled.o"
+"..\obj\mpu6050.o"
+"..\obj\mpuiic.o"
+"..\obj\inv_mpu.o"
+"..\obj\inv_mpu_dmp_motion_driver.o"
 --strict --scatter "..\OBJ\NewProject.sct"
 --summary_stderr --info summarysizes --map --load_addr_map_info --xref --callgraph --symbols
 --info sizes --info totals --info unused --info veneers

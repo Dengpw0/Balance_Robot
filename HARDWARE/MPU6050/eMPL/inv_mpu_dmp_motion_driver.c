@@ -1,4 +1,9 @@
-
+/*
+ $License:
+    Copyright (C) 2011-2012 InvenSense Corporation, All Rights Reserved.
+    See included License.txt for License information.
+ $
+ */
 /**
  *  @addtogroup  DRIVERS Sensor Driver Layer
  *  @brief       Hardware drivers to communicate with sensors via I2C.
@@ -9,10 +14,21 @@
  *      @details    All functions are preceded by the dmp_ prefix to
  *                  differentiate among MPL and general driver function calls.
  */
-#include "sys.h"
+#include <stdio.h>
+#include <stdint.h>
+#include <stdlib.h>
+#include <string.h>
+#include <math.h>
+#include "inv_mpu.h"
+#include "inv_mpu_dmp_motion_driver.h"
+#include "dmpKey.h"
+#include "dmpmap.h"
+#include "usart.h"
+#include "delay.h"
 
-
+//定义目标板采用MSP430
 #define  MOTION_DRIVER_TARGET_MSP430
+
 /* The following functions must be defined for this platform:
  * i2c_write(unsigned char slave_addr, unsigned char reg_addr,
  *      unsigned char length, unsigned char const *data)
@@ -25,9 +41,9 @@
 //#include "msp430.h"
 //#include "msp430_clock.h"
 #define delay_ms    delay_ms
-#define get_ms      get_ms
-#define log_e    printf
-#define log_i    printf
+#define get_ms      mget_ms
+#define log_i 		printf
+#define log_e  		printf
 
 #elif defined EMPL_TARGET_MSP430
 #include "msp430.h"
@@ -52,7 +68,7 @@
 #define log_e       MPL_LOGE
 
 #else
-//#error  Gyro driver is missing the system layer implementations.
+#error  Gyro driver is missing the system layer implementations.
 #endif
 
 /* These defines are copied from dmpDefaultMPU6050.c in the general MPL
@@ -481,14 +497,16 @@ struct dmp_s {
 //    .fifo_rate = 0,
 //    .packet_length = 0
 //};
+
 static struct dmp_s dmp={
-  0,
-  0,
+  NULL,
+  NULL,
   0,
   0,
   0,
   0
 };
+
 /**
  *  @brief  Load the DMP with this image.
  *  @return 0 if successful.
@@ -1254,6 +1272,10 @@ int dmp_read_fifo(short *gyro, short *accel, long *quat,
 {
     unsigned char fifo_data[MAX_PACKET_LENGTH];
     unsigned char ii = 0;
+
+    /* TODO: sensors[0] only changes when dmp_enable_feature is called. We can
+     * cache this value and save some cycles.
+     */
     sensors[0] = 0;
 
     /* Get a packet. */
@@ -1322,7 +1344,7 @@ int dmp_read_fifo(short *gyro, short *accel, long *quat,
     if (dmp.feature_mask & (DMP_FEATURE_TAP | DMP_FEATURE_ANDROID_ORIENT))
         decode_gesture(fifo_data + ii);
 
-    myget_ms(timestamp);
+    get_ms(timestamp);
     return 0;
 }
 
