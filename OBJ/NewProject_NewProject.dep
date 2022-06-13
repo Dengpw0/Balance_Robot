@@ -1,5 +1,5 @@
 Dependencies for Project 'NewProject', Target 'NewProject': (DO NOT MODIFY !)
-F (.\main.c)(0x62A3F0FC)(--c99 --gnu -c --cpu Cortex-M3 -g -O0 --apcs=interwork --split_sections -I ..\USER -I ..\CORE -I ..\STM32F10x_FWLib\inc -I ..\SYSTEM\delay -I ..\SYSTEM\sys -I ..\SYSTEM\usart -I ..\HARDWARE -I ..\HARDWARE\MPU6050 -I ..\RTT -I ..\HARDWARE\OLED -I ..\HARDWARE\MPU6050 -I ..\HARDWARE\MPU6050\eMPL-I.\RTE\_NewProject-ID:\.keilv5\Keil\STM32F1xx_DFP\2.4.0\Device\Include-ID:\.keilv5\ARM\CMSIS\Include-D__UVISION_VERSION="528" -DSTM32F10X_HD -DSTM32F10X_HD -DUSE_STDPERIPH_DRIVER-o ..\obj\main.o --omf_browse ..\obj\main.crf --depend ..\obj\main.d)
+F (.\main.c)(0x62A71C37)(--c99 --gnu -c --cpu Cortex-M3 -g -O0 --apcs=interwork --split_sections -I ..\USER -I ..\CORE -I ..\STM32F10x_FWLib\inc -I ..\SYSTEM\delay -I ..\SYSTEM\sys -I ..\SYSTEM\usart -I ..\HARDWARE -I ..\HARDWARE\MPU6050 -I ..\RTT -I ..\HARDWARE\OLED -I ..\HARDWARE\MPU6050 -I ..\HARDWARE\MPU6050\eMPL-I.\RTE\_NewProject-ID:\.keilv5\Keil\STM32F1xx_DFP\2.4.0\Device\Include-ID:\.keilv5\ARM\CMSIS\Include-D__UVISION_VERSION="528" -DSTM32F10X_HD -DSTM32F10X_HD -DUSE_STDPERIPH_DRIVER-o ..\obj\main.o --omf_browse ..\obj\main.crf --depend ..\obj\main.d)
 I (..\SYSTEM\delay\delay.h)(0x5E8D3E6E)
 I (..\SYSTEM\sys\sys.h)(0x5EFAD89C)
 I (..\USER\stm32f10x.h)(0x4D783CB4)
@@ -42,7 +42,7 @@ I (..\HARDWARE\key.h)(0x62A02179)
 I (..\RTT\SEGGER_RTT.h)(0x58B4654B)
 I (..\RTT\SEGGER_RTT_Conf.h)(0x58B4654B)
 I (..\HARDWARE\pid.h)(0x629E048D)
-I (main.h)(0x62A1C6FE)
+I (main.h)(0x62A6A972)
 I (..\HARDWARE\OLED\oled.h)(0x62A2AC31)
 I (..\HARDWARE\OLED\bmp.h)(0x61A5AA51)
 I (..\HARDWARE\MPU6050\mpu6050.h)(0x60FD19EA)
@@ -950,7 +950,7 @@ I (..\STM32F10x_FWLib\inc\stm32f10x_tim.h)(0x4D783BB4)
 I (..\STM32F10x_FWLib\inc\stm32f10x_usart.h)(0x504F415E)
 I (..\STM32F10x_FWLib\inc\stm32f10x_wwdg.h)(0x4D783BB4)
 I (..\STM32F10x_FWLib\inc\misc.h)(0x4D783BB4)
-F (..\HARDWARE\MotorEncoder.c)(0x62A2A893)(--c99 --gnu -c --cpu Cortex-M3 -g -O0 --apcs=interwork --split_sections -I ..\USER -I ..\CORE -I ..\STM32F10x_FWLib\inc -I ..\SYSTEM\delay -I ..\SYSTEM\sys -I ..\SYSTEM\usart -I ..\HARDWARE -I ..\HARDWARE\MPU6050 -I ..\RTT -I ..\HARDWARE\OLED -I ..\HARDWARE\MPU6050 -I ..\HARDWARE\MPU6050\eMPL-I.\RTE\_NewProject-ID:\.keilv5\Keil\STM32F1xx_DFP\2.4.0\Device\Include-ID:\.keilv5\ARM\CMSIS\Include-D__UVISION_VERSION="528" -DSTM32F10X_HD -DSTM32F10X_HD -DUSE_STDPERIPH_DRIVER-o ..\obj\motorencoder.o --omf_browse ..\obj\motorencoder.crf --depend ..\obj\motorencoder.d)
+F (..\HARDWARE\MotorEncoder.c)(0x62A71B47)(--c99 --gnu -c --cpu Cortex-M3 -g -O0 --apcs=interwork --split_sections -I ..\USER -I ..\CORE -I ..\STM32F10x_FWLib\inc -I ..\SYSTEM\delay -I ..\SYSTEM\sys -I ..\SYSTEM\usart -I ..\HARDWARE -I ..\HARDWARE\MPU6050 -I ..\RTT -I ..\HARDWARE\OLED -I ..\HARDWARE\MPU6050 -I ..\HARDWARE\MPU6050\eMPL-I.\RTE\_NewProject-ID:\.keilv5\Keil\STM32F1xx_DFP\2.4.0\Device\Include-ID:\.keilv5\ARM\CMSIS\Include-D__UVISION_VERSION="528" -DSTM32F10X_HD -DSTM32F10X_HD -DUSE_STDPERIPH_DRIVER-o ..\obj\motorencoder.o --omf_browse ..\obj\motorencoder.crf --depend ..\obj\motorencoder.d)
 I (..\HARDWARE\motorencoder.h)(0x62A1C6FE)
 I (..\SYSTEM\sys\sys.h)(0x5EFAD89C)
 I (..\USER\stm32f10x.h)(0x4D783CB4)
@@ -988,7 +988,11 @@ I (D:\.keilv5\ARM\ARMCC\include\math.h)(0x5CEB79D6)
 I (..\HARDWARE\TB6612.h)(0x62A1C6FE)
 I (..\HARDWARE\pid.h)(0x629E048D)
 I (..\HARDWARE\led.h)(0x62A01B05)
-I (..\USER\main.h)(0x62A1C6FE)
+I (..\USER\main.h)(0x62A6A972)
+I (..\HARDWARE\MPU6050\mpu6050.h)(0x60FD19EA)
+I (..\HARDWARE\MPU6050\mpuiic.h)(0x553DEB84)
+I (..\HARDWARE\MPU6050\eMPL\inv_mpu.h)(0x54B9E069)
+I (..\HARDWARE\MPU6050\eMPL\inv_mpu_dmp_motion_driver.h)(0x50CA9A0D)
 F (..\HARDWARE\usart3.c)(0x5EF85C49)(--c99 --gnu -c --cpu Cortex-M3 -g -O0 --apcs=interwork --split_sections -I ..\USER -I ..\CORE -I ..\STM32F10x_FWLib\inc -I ..\SYSTEM\delay -I ..\SYSTEM\sys -I ..\SYSTEM\usart -I ..\HARDWARE -I ..\HARDWARE\MPU6050 -I ..\RTT -I ..\HARDWARE\OLED -I ..\HARDWARE\MPU6050 -I ..\HARDWARE\MPU6050\eMPL-I.\RTE\_NewProject-ID:\.keilv5\Keil\STM32F1xx_DFP\2.4.0\Device\Include-ID:\.keilv5\ARM\CMSIS\Include-D__UVISION_VERSION="528" -DSTM32F10X_HD -DSTM32F10X_HD -DUSE_STDPERIPH_DRIVER-o ..\obj\usart3.o --omf_browse ..\obj\usart3.crf --depend ..\obj\usart3.d)
 I (..\HARDWARE\usart3.h)(0x5705AF85)
 I (..\SYSTEM\sys\sys.h)(0x5EFAD89C)
@@ -1211,7 +1215,7 @@ I (D:\.keilv5\ARM\ARMCC\include\stdio.h)(0x61A5AA09)
 I (D:\.keilv5\ARM\ARMCC\include\stdlib.h)(0x61A5AAD2)
 I (D:\.keilv5\ARM\ARMCC\include\math.h)(0x5CEB79D6)
 I (..\SYSTEM\delay\delay.h)(0x5E8D3E6E)
-F (..\HARDWARE\MPU6050\eMPL\inv_mpu.c)(0x62A3FD11)(--c99 --gnu -c --cpu Cortex-M3 -g -O0 --apcs=interwork --split_sections -I ..\USER -I ..\CORE -I ..\STM32F10x_FWLib\inc -I ..\SYSTEM\delay -I ..\SYSTEM\sys -I ..\SYSTEM\usart -I ..\HARDWARE -I ..\HARDWARE\MPU6050 -I ..\RTT -I ..\HARDWARE\OLED -I ..\HARDWARE\MPU6050 -I ..\HARDWARE\MPU6050\eMPL-I.\RTE\_NewProject-ID:\.keilv5\Keil\STM32F1xx_DFP\2.4.0\Device\Include-ID:\.keilv5\ARM\CMSIS\Include-D__UVISION_VERSION="528" -DSTM32F10X_HD -DSTM32F10X_HD -DUSE_STDPERIPH_DRIVER-o ..\obj\inv_mpu.o --omf_browse ..\obj\inv_mpu.crf --depend ..\obj\inv_mpu.d)
+F (..\HARDWARE\MPU6050\eMPL\inv_mpu.c)(0x62A5E5CD)(--c99 --gnu -c --cpu Cortex-M3 -g -O0 --apcs=interwork --split_sections -I ..\USER -I ..\CORE -I ..\STM32F10x_FWLib\inc -I ..\SYSTEM\delay -I ..\SYSTEM\sys -I ..\SYSTEM\usart -I ..\HARDWARE -I ..\HARDWARE\MPU6050 -I ..\RTT -I ..\HARDWARE\OLED -I ..\HARDWARE\MPU6050 -I ..\HARDWARE\MPU6050\eMPL-I.\RTE\_NewProject-ID:\.keilv5\Keil\STM32F1xx_DFP\2.4.0\Device\Include-ID:\.keilv5\ARM\CMSIS\Include-D__UVISION_VERSION="528" -DSTM32F10X_HD -DSTM32F10X_HD -DUSE_STDPERIPH_DRIVER-o ..\obj\inv_mpu.o --omf_browse ..\obj\inv_mpu.crf --depend ..\obj\inv_mpu.d)
 I (D:\.keilv5\ARM\ARMCC\include\stdio.h)(0x61A5AA09)
 I (D:\.keilv5\ARM\ARMCC\include\stdint.h)(0x61A5AAD2)
 I (D:\.keilv5\ARM\ARMCC\include\stdlib.h)(0x61A5AAD2)

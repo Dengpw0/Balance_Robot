@@ -38,3 +38,7 @@
 ..\obj\motorencoder.o: ..\HARDWARE\pid.h
 ..\obj\motorencoder.o: ..\HARDWARE\led.h
 ..\obj\motorencoder.o: ..\USER\main.h
+..\obj\motorencoder.o: ..\HARDWARE\MPU6050\mpu6050.h
+..\obj\motorencoder.o: ..\HARDWARE\MPU6050\mpuiic.h
+..\obj\motorencoder.o: ..\HARDWARE\MPU6050\eMPL\inv_mpu.h
+..\obj\motorencoder.o: ..\HARDWARE\MPU6050\eMPL\inv_mpu_dmp_motion_driver.h

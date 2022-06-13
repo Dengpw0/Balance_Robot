@@ -2,6 +2,9 @@
 #include "pid.h"
 #include "led.h"
 #include "main.h"
+#include "mpu6050.h"
+#include "inv_mpu.h"
+#include "inv_mpu_dmp_motion_driver.h" 
 
 //外部变量 extern说明改变量已在其它文件定义
 extern int   Encoder, CurrentPosition; //当前速度、当前位置
@@ -10,6 +13,10 @@ extern float TargetCircle,AngleNow,AngleSet,SpeeSet,SpeedNow,AngleMax,k,AngleMin
 extern float Velcity_Kp,  Velcity_Ki,  Velcity_Kd; //相关速度PID参数
 extern float Position_Kp, Position_Ki, Position_Kd; //相关位置PID参数
 extern int   MortorRun;  //允许电机控制标志位
+
+extern float pitch,roll,yaw,pitch_med; 		//欧拉角							//定义四个实际参数	欧拉角	一个pitch中值，负责平衡
+extern short gyrox,gyroy,gyroz;	//陀螺仪原始数据			//定义三个实际参数	陀螺仪角度
+extern short aacx,aacy,aacz;		//加速度传感器原始数据	//定义三个实际参数	加速度
 
 extern u16 flag;
 extern PidTypeDef position;
@@ -155,31 +162,36 @@ void EncoderRead_TIM2(u16 arr, u16 psc)
 	TIM_Cmd(TIM2, ENABLE); //使能定时器TIM2
 }
 
+/**
+* @name PidCalc
+**/
+void PidCalc(PidTypeDef *pid, float pitch, float gyroy)
+{
+	float PWM_out;
+  
+  PWM_out = pid->Kp*(pitch-pitch_med)+pid->Kd*(gyroy-0);
+  
+	pid->output = PWM_out;
+}
+
+
 /**************************************************************************
 函数功能：TIM2中断服务函数 定时读取编码器数值并进行位置闭环控制 10ms进入一次
 入口参数：无
 返回  值：无
 **************************************************************************/
-#define SPEED 1
-#define POSITION 0
+#define SPEED 0
+#define POSITION 1
 void TIM2_IRQHandler()
 {
   if(TIM_GetITStatus(TIM2, TIM_IT_Update)==1) //当发生中断时状态寄存器(TIMx_SR)的bit0会被硬件置1
 	{
-	   EncoderLeft=Read_Encoder(1);   //读取当前编码器读数，即速度
-		 EncoderRight=Read_Encoder(0);   //读取当前编码器读数，即速度
-
-//		//速度环
-//		SpeeSet = TargetVelocity; //PWM值转换为速度值 76为转换参数;
-//		SpeedNow = Encoder*1000*200*0.000120830;
-//		PID_Calc(&speed,SpeedNow,SpeeSet);
-//		SPEED_PWM = speed.output;		
-//		//位置环
-//		TargetCircle = SPEED_PWM/2000;	//这个数正常
-//		AngleSet = TargetCircle*1560*1.04/2;
-//		AngleNow += Encoder;
-//		PID_Calc(&position,AngleNow,AngleSet);
-//		POSITION_PWM = position.output;
+	   EncoderLeft=Read_Encoder(1);   //读取当前编码器读数
+		 EncoderRight=Read_Encoder(0);   //读取当前编码器读数
+		
+		  mpu_dmp_get_data(&pitch,&roll,&yaw);	//得到数据时，return 0，跳出循环，如果没得到数据，一直循环，直到得到dmp计算出的数据
+      MPU_Get_Gyroscope(&gyrox,&gyroy,&gyroz);  // 读取角速度
+      MPU_Get_Accelerometer(&aacx,&aacy,&aacz); // 读取加速度
 		//正常运行闪灯
 		times ++;
 		if((times - 30)>0)
@@ -187,58 +199,49 @@ void TIM2_IRQHandler()
 			times -= 30;
 			LED1=!LED1;
 		}
-		
-		
-//		//位置环
-//		AngleSet = TargetCircle*1560*1.04/2;
-//		AngleNow += Encoder;
-//		PID_Calc(&position,AngleNow,AngleSet);
-//		POSITION_PWM = position.output;
+//		 //位置环
+//		 motor[LEFT].position.PositionSet = pitch*1560*1.04/2;
+//		 motor[RIGHT].position.PositionSet = pitch*1560*1.04/2;
+//		
+//		 motor[LEFT].position.PositionNow += EncoderLeft;
+//		 motor[RIGHT].position.PositionNow += EncoderRight;
+//		 
+//		 
+//		 PID_Calc(&motor[LEFT].position.position_pid,motor[LEFT].position.PositionNow,motor[LEFT].position.PositionSet);
+//		 PID_Calc(&motor[RIGHT].position.position_pid,motor[RIGHT].position.PositionNow,motor[RIGHT].position.PositionSet);
+//		 
+//		 motor[LEFT].position.PWM = motor[LEFT].position.position_pid.output;
+//		 motor[RIGHT].position.PWM = motor[RIGHT].position.position_pid.output;
+//		
+//		
 //		
 //		//速度环
-//		SpeeSet = POSITION_PWM/76; //PWM值转换为速度值 76为转换参数;
-//		SpeedNow = Encoder*1000*200*0.000120830;
-//		PID_Calc(&speed,SpeedNow,SpeeSet);
-//		SPEED_PWM = speed.output;		
-		 //位置环
-		 motor[LEFT].position.PositionSet = TargetCircle*1560*1.04/2;
-		 motor[RIGHT].position.PositionSet = TargetCircle*1560*1.04/2;
-		
-		 motor[LEFT].position.PositionNow += EncoderLeft;
-		 motor[RIGHT].position.PositionNow += EncoderRight;
-		 
-		 
-		 PID_Calc(&motor[LEFT].position.position_pid,motor[LEFT].position.PositionNow,motor[LEFT].position.PositionSet);
-		 PID_Calc(&motor[RIGHT].position.position_pid,motor[RIGHT].position.PositionNow,motor[RIGHT].position.PositionSet);
-		 
-		 motor[LEFT].position.PWM = motor[LEFT].position.position_pid.output;
-		 motor[RIGHT].position.PWM = motor[RIGHT].position.position_pid.output;
-		
-		
-		
-		//速度环
-		 motor[LEFT].speed.SpeedSet = motor[LEFT].position.PWM/76;	//TargetVelocity;//
-		 motor[RIGHT].speed.SpeedSet = motor[RIGHT].position.PWM/76;	//TargetVelocity;//
-		
-		 motor[LEFT].speed.SpeedNow = EncoderLeft*1000*200*0.000120830;
-		 motor[RIGHT].speed.SpeedNow = EncoderRight*1000*200*0.000120830;
+//		 motor[LEFT].speed.SpeedSet = motor[LEFT].position.PWM/76;	//TargetVelocity;//
+//		 motor[RIGHT].speed.SpeedSet = motor[RIGHT].position.PWM/76;	//TargetVelocity;//
+//		
+//		 motor[LEFT].speed.SpeedNow = EncoderLeft*1000*200*0.000120830;
+//		 motor[RIGHT].speed.SpeedNow = EncoderRight*1000*200*0.000120830;
 		 
 //		 motor[LEFT].speed.seeSpeedSet =  motor[LEFT].speed.SpeedSet;
 //		 motor[RIGHT].speed.seeSpeedSet =  motor[RIGHT].speed.SpeedSet;
 		 
-		 PID_Calc(&motor[LEFT].speed.speed_pid,motor[LEFT].speed.SpeedNow,motor[LEFT].speed.SpeedSet);
-		 PID_Calc(&motor[RIGHT].speed.speed_pid,motor[RIGHT].speed.SpeedNow,motor[RIGHT].speed.SpeedSet);
+//		 PID_Calc(&motor[LEFT].speed.speed_pid,motor[LEFT].speed.SpeedNow,motor[LEFT].speed.SpeedSet);
+//		 PID_Calc(&motor[RIGHT].speed.speed_pid,motor[RIGHT].speed.SpeedNow,motor[RIGHT].speed.SpeedSet);
+//		 
+//		 motor[LEFT].speed.PWM = motor[LEFT].speed.speed_pid.output;
+//		 motor[RIGHT].speed.PWM = motor[RIGHT].speed.speed_pid.output;
 		 
-		 motor[LEFT].speed.PWM = motor[LEFT].speed.speed_pid.output;
-		 motor[RIGHT].speed.PWM = motor[RIGHT].speed.speed_pid.output;
+		 PidCalc(&motor[LEFT].position.imu_pid,pitch,gyroy);
+		 PidCalc(&motor[RIGHT].position.imu_pid,pitch,gyroy);
+		 motor[LEFT].position.PWM = motor[LEFT].position.imu_pid.output;
+		 motor[RIGHT].position.PWM = motor[RIGHT].position.imu_pid.output;
 		 
-
 #if (SPEED==1)
 		SetPWM(motor[LEFT].speed.PWM, motor[RIGHT].speed.PWM); //设置PWM
 #endif
 		
 #if (POSITION==1)
-		SetPWM(POSITION_PWM); //设置PWM
+		SetPWM(motor[LEFT].position.PWM, motor[RIGHT].position.PWM); //设置PWM
 #endif
 			
 		TIM_ClearITPendingBit(TIM2, TIM_IT_Update); //状态寄存器(TIMx_SR)的bit0置0

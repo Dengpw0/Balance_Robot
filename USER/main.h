@@ -15,6 +15,7 @@ typedef struct{
 }speed_control;
 typedef struct{
 	PidTypeDef position_pid;
+	PidTypeDef imu_pid;
 	int seePositionSet;
 	int seePositionNow;
 	float PositionSet;

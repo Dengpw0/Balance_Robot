@@ -27,7 +27,16 @@ Project File Date:  06/11/2022
 <h2>Output:</h2>
 *** Using Compiler 'V5.06 update 6 (build 750)', folder: 'D:\.keilv5\ARM\ARMCC\Bin'
 Build target 'NewProject'
-"..\OBJ\NewProject.axf" - 0 Error(s), 0 Warning(s).
+compiling main.c...
+..\RTT\SEGGER_RTT_Conf.h(243): warning:  #47-D: incompatible redefinition of macro "SEGGER_RTT_LOCK"  (declared at line 177)
+      #define SEGGER_RTT_LOCK()   {                                                                   \
+..\RTT\SEGGER_RTT_Conf.h(250): warning:  #47-D: incompatible redefinition of macro "SEGGER_RTT_UNLOCK"  (declared at line 178)
+      #define SEGGER_RTT_UNLOCK()   BASEPRI = LockState;                                              \
+main.c: 2 warnings, 0 errors
+linking...
+Program Size: Code=27962 RO-data=9902 RW-data=2268 ZI-data=3380  
+FromELF: creating hex file...
+"..\OBJ\NewProject.axf" - 0 Error(s), 2 Warning(s).
 
 <h2>Software Packages used:</h2>
 
@@ -41,7 +50,7 @@ Package Vendor: Keil
   D:\.keilv5\Keil\STM32F1xx_DFP\2.4.0\Device\Include
 
 <h2>Collection of Component Files used:</h2>
-Build Time Elapsed:  00:00:00
+Build Time Elapsed:  00:00:01
 </pre>
 </body>
 </html>
