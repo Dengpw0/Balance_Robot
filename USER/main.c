@@ -50,10 +50,10 @@ short gyrox,gyroy,gyroz;	//陀螺仪原始数据			//定义三个实际参数	陀螺仪角度
 float pitch_med = -7;
 float pwm_value;
 unsigned char logo[16] = "*Balance_Robot*";
-unsigned char pit_1[7] = "pitch: ";
-unsigned char pit_ii[8] = "pitch: -";
-unsigned char pwm_1[5] = "PWM: ";
-unsigned char pwm_ii[6] = "PWM: -";
+unsigned char pit_1[10] = "pitch:   ";
+unsigned char pit_ii[10] = "pitch: -";
+unsigned char gyroy_1[10] = "gyroy:   ";
+unsigned char gyroy_ii[10] = "gyroy: -";
 /***
 * bref @name KEY_Porc
 ***/
@@ -131,8 +131,12 @@ void TASK_Init(void)
 ***/
 void PID_Init(void)
 {
-	 PIDInit(&motor[LEFT].position.imu_pid,200,0,0.5,0,6000, 0, 20, 3600, 30 * 19 * 4, 970, POSITION_360);
-	 PIDInit(&motor[RIGHT].position.imu_pid,200,0,0.5,0,6000, 0, 20, 3600, 30 * 19 * 4, 970, POSITION_360);
+	//能平衡跑一段
+//	 PIDInit(&motor[LEFT].position.imu_pid,600,0,2,0,6000, 0, 20, 3600, 30 * 19 * 4, 970, POSITION_360);
+//	 PIDInit(&motor[RIGHT].position.imu_pid,600,0,2,0,6000, 0, 20, 3600, 30 * 19 * 4, 970, POSITION_360);
+		
+	 PIDInit(&motor[LEFT].position.imu_pid,1600,0,6,0,6000, 0, 20, 3600, 30 * 19 * 4, 970, POSITION_360);
+	 PIDInit(&motor[RIGHT].position.imu_pid,1600,0,6,0,6000, 0, 20, 3600, 30 * 19 * 4, 970, POSITION_360);
 	
 	 PIDInit(&motor[LEFT].position.position_pid,420,0,600,0,6000, 0, 20, 3600, 30 * 19 * 4, 970, POSITION_360);
 	 PIDInit(&motor[RIGHT].position.position_pid,420,0,600,0,6000, 0, 20, 3600, 30 * 19 * 4, 970, POSITION_360);
@@ -149,23 +153,15 @@ void OLEDShow_Proc(void)
 	 if(pitch>=0){
 		 OLED_ShowString(00, 18, pit_1, 16); 
 		 OLED_ShowNum(69,18,pitch,2,16);
-		 
-		 OLED_ShowString(00, 36, pwm_ii, 16); 
-		 pwm_value = -motor[LEFT].position.PWM;
-		 OLED_ShowNum(44,36,pwm_value,4,16);
-		 pwm_value = -motor[RIGHT].position.PWM;
-		 OLED_ShowNum(88,36,pwm_value,4,16);
+		 OLED_ShowString(00, 40, gyroy_1, 16); 
+		 OLED_ShowNum(69,40,gyroy,2,16);
 	 }
-		else{
-		 OLED_ShowString(00, 18, pit_ii, 16); 
-		 OLED_ShowNum(69,18,-pitch,2,16);
-			
-		 OLED_ShowString(00, 36, pwm_1, 16); 
-		 pwm_value = motor[LEFT].position.PWM;
-		 OLED_ShowNum(44,36,pwm_value,4,16);
-		 pwm_value = motor[RIGHT].position.PWM;
-		 OLED_ShowNum(88,36,pwm_value,4,16);
-		}
+	else{
+	 OLED_ShowString(00, 18, pit_ii, 16); 
+	 OLED_ShowNum(69,18,-pitch,2,16);
+	 OLED_ShowString(00, 40, gyroy_ii, 16); 
+	 OLED_ShowNum(69,40,-gyroy,2,16);
+	}
 		
 		
 		
