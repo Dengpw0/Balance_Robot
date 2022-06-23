@@ -14,8 +14,9 @@
 //All rights reserved									  
 ////////////////////////////////////////////////////////////////////////////////// 	
 
-void TIM14_PWM_Init(u32 arr,u32 psc);
+void TIM2_PWM_Init(u32 arr,u32 psc);
 void TIM3_Encode_Init(void);
+void TIM4_Encode_Init(void);
 int Read_Encoder(int left_or_right);
 void EncoderRead_TIM1(u16 arr, u16 psc);
 void SetPWM(int pwmleft,int pwmright);

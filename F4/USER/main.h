@@ -3,6 +3,14 @@
 
 #define LEFT 1
 #define RIGHT 0
+
+#define Go_font 1
+#define Go_back 2
+#define Go_left 3
+#define Go_right 4
+
+
+
 #include "pid.h"
 
 typedef struct{
@@ -30,5 +38,5 @@ typedef struct{
 
 
 extern motor_control motor[2];
-
+extern u8 usart_value;
 #endif

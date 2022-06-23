@@ -31,3 +31,5 @@
 ..\obj\usart.o: ..\FWLIB\inc\stm32f4xx_flash_ramfunc.h
 ..\obj\usart.o: ..\SYSTEM\usart\usart.h
 ..\obj\usart.o: D:\.keilv5\ARM\ARMCC\Bin\..\include\stdio.h
+..\obj\usart.o: ..\USER\main.h
+..\obj\usart.o: ..\HARDWARE\PID\pid.h

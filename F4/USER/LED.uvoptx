@@ -157,30 +157,40 @@
         <Bp>
           <Number>0</Number>
           <Type>0</Type>
-          <LineNumber>187</LineNumber>
+          <LineNumber>129</LineNumber>
           <EnabledFlag>1</EnabledFlag>
-          <Address>134220760</Address>
+          <Address>134222178</Address>
           <ByteObject>0</ByteObject>
           <HtxType>0</HtxType>
           <ManyObjects>0</ManyObjects>
           <SizeOfObject>0</SizeOfObject>
           <BreakByAccess>0</BreakByAccess>
           <BreakIfRCount>1</BreakIfRCount>
-          <Filename>..\HARDWARE\TIMER\timer.c</Filename>
+          <Filename>..\SYSTEM\usart\usart.c</Filename>
           <ExecCommand></ExecCommand>
-          <Expression>\\LED\../HARDWARE/TIMER/timer.c\187</Expression>
+          <Expression>\\LED\../SYSTEM/usart/usart.c\129</Expression>
         </Bp>
       </Breakpoint>
       <WatchWindow1>
         <Ww>
           <count>0</count>
           <WinNumber>1</WinNumber>
-          <ItemText>pwmleft,0x0A</ItemText>
+          <ItemText>motor[2]</ItemText>
         </Ww>
         <Ww>
           <count>1</count>
           <WinNumber>1</WinNumber>
-          <ItemText>motor[2]</ItemText>
+          <ItemText>EncoderLeft,0x0A</ItemText>
+        </Ww>
+        <Ww>
+          <count>2</count>
+          <WinNumber>1</WinNumber>
+          <ItemText>pwmright,0x0A</ItemText>
+        </Ww>
+        <Ww>
+          <count>3</count>
+          <WinNumber>1</WinNumber>
+          <ItemText>Res,0x0A</ItemText>
         </Ww>
       </WatchWindow1>
       <Tracepoint>
@@ -301,7 +311,7 @@
       <GroupNumber>2</GroupNumber>
       <FileNumber>5</FileNumber>
       <FileType>1</FileType>
-      <tvExp>1</tvExp>
+      <tvExp>0</tvExp>
       <tvExpOptDlg>0</tvExpOptDlg>
       <bDave2>0</bDave2>
       <PathWithFileName>..\HARDWARE\TIMER\timer.c</PathWithFileName>
