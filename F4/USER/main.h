@@ -30,13 +30,17 @@ typedef struct{
 	float PositionNow;
 	float PWM;
 }position_control;
-
+typedef struct{
+	PidTypeDef diff_pid;
+}speed_difference;
 typedef struct{
 	speed_control speed;
 	position_control position;
+	
 }motor_control;
 
 
 extern motor_control motor[2];
 extern u8 usart_value;
+extern speed_difference speed_diff[2];
 #endif

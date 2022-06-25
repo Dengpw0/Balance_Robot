@@ -21,6 +21,7 @@
 //外部变量 extern说明改变量已在其它文件定义
 extern int   Encoder, CurrentPosition; //当前速度、当前位置
 extern int   TargetVelocity, CurrentPosition, EncoderLeft,EncoderRight,PWM_left,PWM_right;//目标速度、目标圈数、编码器读数、PWM控制变量
+extern int speedleft,speedright;
 extern float TargetCircle,AngleNow,AngleSet,SpeeSet,SpeedNow,AngleMax,k,AngleMin;
 extern float Velcity_Kp,  Velcity_Ki,  Velcity_Kd; //相关速度PID参数
 extern float Position_Kp, Position_Ki, Position_Kd; //相关位置PID参数
@@ -283,14 +284,20 @@ void TIM4_IRQHandler()
 		 motor[LEFT].position.PWM = motor[LEFT].position.imu_pid.output;
 		 motor[RIGHT].position.PWM = motor[RIGHT].position.imu_pid.output;
 		 
+		 //差速补偿，
+		 PID_Calc(&speed_diff[LEFT].diff_pid,motor[LEFT].position.PWM,motor[RIGHT].position.PWM);
+		 PID_Calc(&speed_diff[RIGHT].diff_pid,motor[RIGHT].position.PWM,motor[LEFT].position.PWM);
+		 speedleft = motor[LEFT].position.PWM+speed_diff[LEFT].diff_pid.output;
+		 speedright = motor[RIGHT].position.PWM+speed_diff[RIGHT].diff_pid.output;
 //		if(usart_value == Go_back)
 //			 motor[LEFT].speed.PWM = 0;
-#if (SPEED==1)
-		SetPWM(motor[LEFT].speed.PWM,motor[RIGHT].speed.PWM); //设置PWM
+#if (SPEED)
+SetPWM(motor[LEFT].speed.PWM,motor[RIGHT].speed.PWM); //设置PWM
 #endif
 		
-#if (POSITION==1)
-		SetPWM(motor[LEFT].position.PWM, motor[RIGHT].position.PWM); //设置PWM
+#if (POSITION)
+//		SetPWM(motor[LEFT].position.PWM, motor[RIGHT].position.PWM); //设置PWM
+SetPWM(speedleft, speedright); //设置PWM
 #endif
 			
 		TIM_ClearITPendingBit(TIM4, TIM_IT_Update); //状态寄存器(TIMx_SR)的bit0置0
