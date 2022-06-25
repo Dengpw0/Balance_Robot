@@ -35,3 +35,7 @@
 ..\obj\timer.o: D:\.keilv5\ARM\ARMCC\Bin\..\include\stdio.h
 ..\obj\timer.o: ..\USER\main.h
 ..\obj\timer.o: ..\HARDWARE\PID\pid.h
+..\obj\timer.o: ..\HARDWARE\MPU6050\mpu6050.h
+..\obj\timer.o: ..\HARDWARE\MPU6050\mpuiic.h
+..\obj\timer.o: ..\HARDWARE\MPU6050\eMPL\inv_mpu.h
+..\obj\timer.o: ..\HARDWARE\MPU6050\eMPL\inv_mpu_dmp_motion_driver.h

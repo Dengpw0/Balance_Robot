@@ -1,7 +1,10 @@
 #include "timer.h"
 #include "led.h"
 #include "usart.h"
- #include "main.h"
+#include "main.h"
+#include "mpu6050.h"
+#include "inv_mpu.h"
+#include "inv_mpu_dmp_motion_driver.h" 
 //////////////////////////////////////////////////////////////////////////////////	 
 //本程序只供学习使用，未经作者许可，不得用于其它任何用途
 //ALIENTEK STM32F407开发板
@@ -225,32 +228,63 @@ void EncoderRead_TIM1(u16 arr, u16 psc)
 	
 	TIM_Cmd(TIM4, ENABLE); //使能定时器TIM2
 }
-#define SPEED 1
-#define POSITION 0
+/**
+* @name PidCalc
+**/
+void PidCalc(PidTypeDef *pid, float pitch, float gyroy)
+{
+	float PWM_out;
+  PWM_out = pid->Kp*(pitch-pitch_med)+pid->Kd*(gyroy-0);
+	pid->output = PWM_out;
+}
+#define SPEED 0
+#define POSITION 1
 void TIM4_IRQHandler()
 {
   if(TIM_GetITStatus(TIM4, TIM_IT_Update)==1) //当发生中断时状态寄存器(TIMx_SR)的bit0会被硬件置1
 	{
 	   EncoderLeft=Read_Encoder(0);   //读取当前编码器读数
 		 EncoderRight=Read_Encoder(1);   //读取当前编码器读数
-		//速度环
-		 motor[LEFT].speed.SpeedSet = TargetVelocity;//motor[LEFT].position.PWM/76;	//
-		 motor[RIGHT].speed.SpeedSet = TargetVelocity;//motor[RIGHT].position.PWM/76;	//
+		 mpu_dmp_get_data(&pitch,&roll,&yaw);	//得到数据时，return 0，跳出循环，如果没得到数据，一直循环，直到得到dmp计算出的数据
+     MPU_Get_Gyroscope(&gyrox,&gyroy,&gyroz);  // 读取角速度
+     MPU_Get_Accelerometer(&aacx,&aacy,&aacz); // 读取加速度
+		 //位置环
+//		 motor[LEFT].position.PositionSet = 1;
+//		 motor[RIGHT].position.PositionSet = 2;
+//		
+//		 motor[LEFT].position.PositionNow += EncoderLeft;
+//		 motor[RIGHT].position.PositionNow += EncoderRight;
+//		 
+//		 PID_Calc(&motor[LEFT].position.position_pid,motor[LEFT].position.PositionNow,motor[LEFT].position.PositionSet);
+//		 PID_Calc(&motor[RIGHT].position.position_pid,motor[RIGHT].position.PositionNow,motor[RIGHT].position.PositionSet);
+//		 
+//		 motor[LEFT].position.PWM = motor[LEFT].position.position_pid.output;
+//		 motor[RIGHT].position.PWM = motor[RIGHT].position.position_pid.output;
 		
-		 motor[LEFT].speed.SpeedNow = EncoderLeft*1000*200*0.000120830;
-		 motor[RIGHT].speed.SpeedNow = EncoderRight*1000*200*0.000120830;
+//		//速度环
+//		 motor[LEFT].speed.SpeedSet = TargetVelocity;//motor[LEFT].position.PWM/76;	//
+//		 motor[RIGHT].speed.SpeedSet = TargetVelocity;//motor[RIGHT].position.PWM/76;	//
+//		
+//		 motor[LEFT].speed.SpeedNow = EncoderLeft*1000*200*0.000120830;
+//		 motor[RIGHT].speed.SpeedNow = EncoderRight*1000*200*0.000120830;
+//		 
+//		 motor[LEFT].speed.seeSpeedSet =  motor[LEFT].speed.SpeedSet;
+//		 motor[RIGHT].speed.seeSpeedSet =  motor[RIGHT].speed.SpeedSet;
+//		 
+//		 PID_Calc(&motor[LEFT].speed.speed_pid,motor[LEFT].speed.SpeedNow,motor[LEFT].speed.SpeedSet);
+//		 PID_Calc(&motor[RIGHT].speed.speed_pid,motor[RIGHT].speed.SpeedNow,motor[RIGHT].speed.SpeedSet);
+//		 
+//		 motor[LEFT].speed.PWM = motor[LEFT].speed.speed_pid.output;
+//		 motor[RIGHT].speed.PWM = motor[RIGHT].speed.speed_pid.output;
+		
+		//直立环
+		 PidCalc(&motor[LEFT].position.imu_pid,pitch,gyroy);
+		 PidCalc(&motor[RIGHT].position.imu_pid,pitch,gyroy);
+		 motor[LEFT].position.PWM = motor[LEFT].position.imu_pid.output;
+		 motor[RIGHT].position.PWM = motor[RIGHT].position.imu_pid.output;
 		 
-		 motor[LEFT].speed.seeSpeedSet =  motor[LEFT].speed.SpeedSet;
-		 motor[RIGHT].speed.seeSpeedSet =  motor[RIGHT].speed.SpeedSet;
-		 
-		 PID_Calc(&motor[LEFT].speed.speed_pid,motor[LEFT].speed.SpeedNow,motor[LEFT].speed.SpeedSet);
-		 PID_Calc(&motor[RIGHT].speed.speed_pid,motor[RIGHT].speed.SpeedNow,motor[RIGHT].speed.SpeedSet);
-		 
-		 motor[LEFT].speed.PWM = motor[LEFT].speed.speed_pid.output;
-		 motor[RIGHT].speed.PWM = motor[RIGHT].speed.speed_pid.output;
-		 
-		if(usart_value == Go_back)
-			 motor[LEFT].speed.PWM = 0;
+//		if(usart_value == Go_back)
+//			 motor[LEFT].speed.PWM = 0;
 #if (SPEED==1)
 		SetPWM(motor[LEFT].speed.PWM,motor[RIGHT].speed.PWM); //设置PWM
 #endif
