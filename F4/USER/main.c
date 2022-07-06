@@ -15,7 +15,7 @@ speed_difference speed_diff[2];
 float pitch,roll,yaw; 		//欧拉角							//定义三个实际参数	欧拉角
 short aacx,aacy,aacz;		//加速度传感器原始数据	//定义三个实际参数	加速度
 short gyrox,gyroy,gyroz;	//陀螺仪原始数据			//定义三个实际参数	陀螺仪角度
-float pitch_med = -2.4;			//陀螺仪中值		-7是水平，却不是回中  -12 -3阈值		1.1-4.1
+float pitch_med = -2.6;//-3.5;			//陀螺仪中值		-7是水平，却不是回中  -12 -3阈值		1.1-4.1
 
 int seepitch;
 int Res;
@@ -53,16 +53,33 @@ int main(void)
 //	PIDInit(&motor[RIGHT].position.imu_pid,-3800,0,-5,0,6000, 0, 20, 3600, 30 * 19 * 4, 970, POSITION_360);
 //4.5抖			3300 4.5来回抖		3000 4.5好许多	2800 4.5起不来还有些抖	3000 9 抖两下，但是起不来了
 //抖来抖去，勉强直立
- PIDInit(&motor[LEFT].position.imu_pid,-3500,0,-5,0,6000, 0, 20, 3600, 30 * 19 * 4, 970, POSITION_360);
- PIDInit(&motor[RIGHT].position.imu_pid,-3500,0,-5,0,6000, 0, 20, 3600, 30 * 19 * 4, 970, POSITION_360);
- PIDInit(&speed_diff[LEFT].diff_pid,60,0.1,0.5,0,6500, 0, 250, 40 * 19, 30 * 19 * 2, 1350, SPEED);
- PIDInit(&speed_diff[RIGHT].diff_pid,60,0.1,0.5,0,6500, 0, 250, 40 * 19, 30 * 19 * 2, 1350, SPEED);
+// PIDInit(&motor[LEFT].position.imu_pid,-3500,0,-5,0,6000, 0, 20, 3600, 30 * 19 * 4, 970, POSITION_360);
+// PIDInit(&motor[RIGHT].position.imu_pid,-3500,0,-5,0,6000, 0, 20, 3600, 30 * 19 * 4, 970, POSITION_360);
+
+/**************** 去掉差速 *******************/
+//按道理是这么大调，但是发现差速不能加后，用回上面的那个，立柱了，就是超频很严重
+// PIDInit(&motor[LEFT].position.imu_pid,-500,0,-0,0,6000, 0, 20, 3600, 30 * 19 * 4, 970, POSITION_360);
+// PIDInit(&motor[RIGHT].position.imu_pid,-500,0,-0,0,6000, 0, 20, 3600, 30 * 19 * 4, 970, POSITION_360);
+//立柱，但是抖来抖去（-3.5）
+// PIDInit(&motor[LEFT].position.imu_pid,-3500,0,-5,0,6000, 0, 20, 3600, 30 * 19 * 4, 970, POSITION_360);
+// PIDInit(&motor[RIGHT].position.imu_pid,-3500,0,-5,0,6000, 0, 20, 3600, 30 * 19 * 4, 970, POSITION_360);
+//已经立柱了，还是有一点点抖，可能机械中值还有些偏 
+// PIDInit(&motor[LEFT].position.imu_pid,-2800,0,-5,0,6000, 0, 20, 3600, 30 * 19 * 4, 970, POSITION_360);
+// PIDInit(&motor[RIGHT].position.imu_pid,-2800,0,-5,0,6000, 0, 20, 3600, 30 * 19 * 4, 970, POSITION_360);
+//效果不好
+// PIDInit(&motor[LEFT].position.imu_pid,-1000,0,-0.8,0,6000, 0, 20, 3600, 30 * 19 * 4, 970, POSITION_360);
+// PIDInit(&motor[RIGHT].position.imu_pid,-1000,0,-0.8,0,6000, 0, 20, 3600, 30 * 19 * 4, 970, POSITION_360);
+//先这样，但是pitch轴还会飘，有些超调，好很多
+ PIDInit(&motor[LEFT].position.imu_pid,-2700,0,-5,0,6000, 0, 20, 3600, 30 * 19 * 4, 970, POSITION_360);
+ PIDInit(&motor[RIGHT].position.imu_pid,-2700,0,-5,0,6000, 0, 20, 3600, 30 * 19 * 4, 970, POSITION_360);
+ PIDInit(&speed_diff[LEFT].diff_pid,0,0,0,0,6500, 0, 250, 40 * 19, 30 * 19 * 2, 1350, SPEED);
+ PIDInit(&speed_diff[RIGHT].diff_pid,0,0,0,0,6500, 0, 250, 40 * 19, 30 * 19 * 2, 1350, SPEED);
+ 
  PIDInit(&motor[LEFT].speed.speed_pid,60,0.1,0.5,0,6500, 0, 250, 40 * 19, 30 * 19 * 2, 1350, SPEED);
  PIDInit(&motor[RIGHT].speed.speed_pid,60,0.1,0.5,0,6500, 0, 250, 40 * 19, 30 * 19 * 2, 1350, SPEED);
  PIDInit(&motor[LEFT].position.position_pid,420,0,600,0,6000, 0, 20, 3600, 30 * 19 * 4, 970, POSITION_360);
  PIDInit(&motor[RIGHT].position.position_pid,420,0,600,0,6000, 0, 20, 3600, 30 * 19 * 4, 970, POSITION_360);
   while(1) //实现比较值从0-300递增，到300后从300-0递减，循环
 	{
- 		seepitch = pitch;
 	}
 }

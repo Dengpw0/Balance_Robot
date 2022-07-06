@@ -284,11 +284,13 @@ void TIM4_IRQHandler()
 		 motor[LEFT].position.PWM = motor[LEFT].position.imu_pid.output;
 		 motor[RIGHT].position.PWM = motor[RIGHT].position.imu_pid.output;
 		 
-		 //差速补偿，
-		 PID_Calc(&speed_diff[LEFT].diff_pid,motor[LEFT].position.PWM,motor[RIGHT].position.PWM);
-		 PID_Calc(&speed_diff[RIGHT].diff_pid,motor[RIGHT].position.PWM,motor[LEFT].position.PWM);
-		 speedleft = motor[LEFT].position.PWM+speed_diff[LEFT].diff_pid.output;
-		 speedright = motor[RIGHT].position.PWM+speed_diff[RIGHT].diff_pid.output;
+//		 //差速补偿，	。。不能加差速，直立环很南条
+//		 PID_Calc(&speed_diff[LEFT].diff_pid,motor[LEFT].position.PWM,motor[RIGHT].position.PWM);
+//		 PID_Calc(&speed_diff[RIGHT].diff_pid,motor[RIGHT].position.PWM,motor[LEFT].position.PWM);
+//		 speedleft = motor[LEFT].position.PWM+speed_diff[LEFT].diff_pid.output;
+//		 speedright = motor[RIGHT].position.PWM+speed_diff[RIGHT].diff_pid.output;
+		 speedleft = motor[LEFT].position.PWM;
+		 speedright = motor[RIGHT].position.PWM;
 //		if(usart_value == Go_back)
 //			 motor[LEFT].speed.PWM = 0;
 #if (SPEED)
