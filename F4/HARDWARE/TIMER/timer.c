@@ -23,7 +23,7 @@
 extern int   Encoder, CurrentPosition; //当前速度、当前位置
 extern int   TargetVelocity, CurrentPosition, EncoderLeft,EncoderRight,PWM_left,PWM_right;//目标速度、目标圈数、编码器读数、PWM控制变量
 extern int speedleft,speedright;
-extern float TargetCircle,AngleNow,AngleSet,SpeeSet,SpeedNow,AngleMax,k,AngleMin;
+extern float targetspeed;	//速度环期望（直立时为0.行走时给值）
 extern float Velcity_Kp,  Velcity_Ki,  Velcity_Kd; //相关速度PID参数
 extern float Position_Kp, Position_Ki, Position_Kd; //相关位置PID参数
 extern int   MortorRun;  //允许电机控制标志位
@@ -232,13 +232,40 @@ void EncoderRead_TIM1(u16 arr, u16 psc)
 	TIM_Cmd(TIM4, ENABLE); //使能定时器TIM2
 }
 /**
-* @name PidCalc
+* @name PidCalc_IMU
 **/
-void PidCalc(PidTypeDef *pid, float pitch, float gyroy)
+void PidCalc_IMU(PidTypeDef *pid, float med, float pitch, float gyroy,float type)
 {
 	float PWM_out;
-  PWM_out = pid->Kp*(pitch-pitch_med)+pid->Kd*(gyroy-groy_med);
+  PWM_out = pid->Kp*(pitch-med)+pid->Kd*(gyroy-groy_med);
 	pid->output = PWM_out;
+}
+/**
+* @name PidCalc_Encode
+**/
+void PidCalc_Encode(PidTypeDef *pid, float left, float right, float targetspeed, float type)
+{
+	static float PWM_out;
+	static float Encoder_S;
+	static float Encoder_Least,Encoder_Least_last;
+	static float Err_Lowout,Err_Lowout_last;	//低通滤波
+  static float a=0.7;
+	// 1.计算速度偏差
+  // 舍去误差--我的理解：能够让速度为"0"的角度，就是机械中值。
+	Encoder_Least = (left+right) - targetspeed;
+	// 2.对速度偏差进行低通滤波
+  // low_out = (1-a)*Ek+a*low_out_last
+  Err_Lowout = (1-a)*Encoder_Least + a*Encoder_Least_last; // 使得波形更加平滑，滤除高频干扰，放置速度突变
+  Err_Lowout_last = Err_Lowout;   // 防止速度过大影响直立环的正常工作
+  // 3.对速度偏差积分出位移
+  Encoder_S+=Err_Lowout;
+  // 4.积分限幅
+  Encoder_S=Encoder_S>10000?10000:(Encoder_S<(-10000)?(-10000):Encoder_S);
+  
+  // 5.速度环控制输出
+  PWM_out = pid->Kp*Err_Lowout+pid->Ki*Encoder_S;
+  
+  pid->output = PWM_out;
 }
 #define SPEED 0
 #define POSITION 1
@@ -266,25 +293,26 @@ void TIM4_IRQHandler()
 //		 motor[LEFT].position.PWM = motor[LEFT].position.position_pid.output;
 //		 motor[RIGHT].position.PWM = motor[RIGHT].position.position_pid.output;
 		
-//		//速度环
+		//速度环
 //		 motor[LEFT].speed.SpeedSet = TargetVelocity;//motor[LEFT].position.PWM/76;	//
 //		 motor[RIGHT].speed.SpeedSet = TargetVelocity;//motor[RIGHT].position.PWM/76;	//
-//		
-//		 motor[LEFT].speed.SpeedNow = EncoderLeft*1000*200*0.000120830;
-//		 motor[RIGHT].speed.SpeedNow = EncoderRight*1000*200*0.000120830;
-//		 
+		
+		 motor[LEFT].speed.SpeedNow = EncoderLeft*1000*200*0.000120830;
+		 motor[RIGHT].speed.SpeedNow = EncoderRight*1000*200*0.000120830;
+		 
 //		 motor[LEFT].speed.seeSpeedSet =  motor[LEFT].speed.SpeedSet;
 //		 motor[RIGHT].speed.seeSpeedSet =  motor[RIGHT].speed.SpeedSet;
-//		 
+	 
 //		 PID_Calc(&motor[LEFT].speed.speed_pid,motor[LEFT].speed.SpeedNow,motor[LEFT].speed.SpeedSet);
 //		 PID_Calc(&motor[RIGHT].speed.speed_pid,motor[RIGHT].speed.SpeedNow,motor[RIGHT].speed.SpeedSet);
-//		 
-//		 motor[LEFT].speed.PWM = motor[LEFT].speed.speed_pid.output;
-//		 motor[RIGHT].speed.PWM = motor[RIGHT].speed.speed_pid.output;
+		 PidCalc_Encode(&motor[DOUBLE].speed.speed_pid,EncoderLeft,EncoderRight,targetspeed,ENCODE_SPEED);
+//		 motor[LEFT].speed.PWM = motor[DOUBLE].speed.speed_pid.output;
+//		 motor[RIGHT].speed.PWM = motor[LEFT].speed.PWM;
+		
 		
 		//直立环
-		 PidCalc(&motor[LEFT].position.imu_pid,pitch_kalman,gyroy);
-		 PidCalc(&motor[RIGHT].position.imu_pid,pitch_kalman,gyroy);
+		 PidCalc_IMU(&motor[LEFT].position.imu_pid,pitch_med+motor[DOUBLE].speed.speed_pid.output,pitch_kalman,gyroy,IMU_POSITION);
+		 PidCalc_IMU(&motor[RIGHT].position.imu_pid,pitch_med+motor[DOUBLE].speed.speed_pid.output,pitch_kalman,gyroy,IMU_POSITION);
 		 motor[LEFT].position.PWM = motor[LEFT].position.imu_pid.output;
 		 motor[RIGHT].position.PWM = motor[RIGHT].position.imu_pid.output;
 		 
@@ -295,8 +323,7 @@ void TIM4_IRQHandler()
 //		 speedright = motor[RIGHT].position.PWM+speed_diff[RIGHT].diff_pid.output;
 		 speedleft = motor[LEFT].position.PWM;
 		 speedright = motor[RIGHT].position.PWM;
-//		if(usart_value == Go_back)
-//			 motor[LEFT].speed.PWM = 0;
+			 
 #if (SPEED)
 SetPWM(motor[LEFT].speed.PWM,motor[RIGHT].speed.PWM); //设置PWM
 #endif

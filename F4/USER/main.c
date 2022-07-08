@@ -19,6 +19,7 @@ short aacx,aacy,aacz;		//加速度传感器原始数据	//定义三个实际参数	加速度
 short gyrox,gyroy,gyroz;	//陀螺仪原始数据			//定义三个实际参数	陀螺仪角度
 float pitch_med = -3.5;//-3.5;			//陀螺仪中值		-7是水平，却不是回中  -12 -3阈值		1.1-4.1
 float groy_med = -37;
+float targetspeed = 0;	//速度环期望（直立时为0.行走时给值）
 int pitchsee;
 //my_value
 int seepitch;
@@ -78,17 +79,37 @@ int main(void)
 //不行
 // PIDInit(&motor[LEFT].position.imu_pid,-400,0,-0.5,0,6000, 0, 20, 3600, 30 * 19 * 4, 970, POSITION_360);
 // PIDInit(&motor[RIGHT].position.imu_pid,-400,0,-0.5,0,6000, 0, 20, 3600, 30 * 19 * 4, 970, POSITION_360);
+//稳住
  PIDInit(&motor[LEFT].position.imu_pid,-4000,0,-6.6,0,6000, 0, 20, 3600, 30 * 19 * 4, 970, POSITION_360);
  PIDInit(&motor[RIGHT].position.imu_pid,-4000,0,-6.6,0,6000, 0, 20, 3600, 30 * 19 * 4, 970, POSITION_360);
  PIDInit(&speed_diff[LEFT].diff_pid,0,0,0,0,6500, 0, 250, 40 * 19, 30 * 19 * 2, 1350, SPEED);
  PIDInit(&speed_diff[RIGHT].diff_pid,0,0,0,0,6500, 0, 250, 40 * 19, 30 * 19 * 2, 1350, SPEED);
  
+  PIDInit(&motor[DOUBLE].speed.speed_pid,0.03,0.00015,0,0,6500, 0, 250, 40 * 19, 30 * 19 * 2, 1350, SPEED);
  PIDInit(&motor[LEFT].speed.speed_pid,60,0.1,0.5,0,6500, 0, 250, 40 * 19, 30 * 19 * 2, 1350, SPEED);
  PIDInit(&motor[RIGHT].speed.speed_pid,60,0.1,0.5,0,6500, 0, 250, 40 * 19, 30 * 19 * 2, 1350, SPEED);
  PIDInit(&motor[LEFT].position.position_pid,420,0,600,0,6000, 0, 20, 3600, 30 * 19 * 4, 970, POSITION_360);
  PIDInit(&motor[RIGHT].position.position_pid,420,0,600,0,6000, 0, 20, 3600, 30 * 19 * 4, 970, POSITION_360);
   while(1) //实现比较值从0-300递增，到300后从300-0递减，循环
 	{
+		switch(usart_value)
+		{
+			case Return:
+				targetspeed = 0;
+				break;
+			case Go_font:
+				targetspeed = 30;
+			  break;
+			case Go_back:
+				targetspeed = -30;
+			  break;
+			case Go_left:
+//				targetspeed = -20;
+			  break;
+			case Go_right:
+//				targetspeed = -20;
+			  break;
+		}
 		SEGGER_RTT_printf(0,"pitch_kalman %d\r\n",pitch_kalman);
 //					if((lastspeed-viewspeed)>50||(lastspeed-viewspeed)<-50)
 //					SEGGER_RTT_printf(0,"times %d\r\n",times++);
