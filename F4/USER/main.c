@@ -10,7 +10,7 @@
 #include "inv_mpu_dmp_motion_driver.h" 
 #include "kalman.h"
 //MOTOR
-int   TargetVelocity=100, EncoderLeft,EncoderRight,PWM_left,PWM_right;  //目标速度、目标圈数(位置)、编码器读数、PWM控制变量
+int   TargetVelocity=100, EncoderLeft,EncoderRight,PWM_left,PWM_right,Turn_out;  //目标速度、目标圈数(位置)、编码器读数、PWM控制变量
 motor_control motor[2];
 speed_difference speed_diff[2];
 //MPU6050
@@ -21,6 +21,7 @@ float pitch_med = -3.5;//-3.5;			//陀螺仪中值		-7是水平，却不是回中  -12 -3阈值	
 float groy_med = -37;
 float targetspeed = 0;	//速度环期望（直立时为0.行走时给值）
 int pitchsee;
+int Turn_Kp,gyroz_med,gyroz_set;
 //my_value
 int seepitch;
 int Res;
@@ -80,14 +81,18 @@ int main(void)
 // PIDInit(&motor[LEFT].position.imu_pid,-400,0,-0.5,0,6000, 0, 20, 3600, 30 * 19 * 4, 970, POSITION_360);
 // PIDInit(&motor[RIGHT].position.imu_pid,-400,0,-0.5,0,6000, 0, 20, 3600, 30 * 19 * 4, 970, POSITION_360);
 //稳住
+ //直立环（陀螺仪）
  PIDInit(&motor[LEFT].position.imu_pid,-4000,0,-6.6,0,6000, 0, 20, 3600, 30 * 19 * 4, 970, POSITION_360);
  PIDInit(&motor[RIGHT].position.imu_pid,-4000,0,-6.6,0,6000, 0, 20, 3600, 30 * 19 * 4, 970, POSITION_360);
- PIDInit(&speed_diff[LEFT].diff_pid,0,0,0,0,6500, 0, 250, 40 * 19, 30 * 19 * 2, 1350, SPEED);
- PIDInit(&speed_diff[RIGHT].diff_pid,0,0,0,0,6500, 0, 250, 40 * 19, 30 * 19 * 2, 1350, SPEED);
- 
-  PIDInit(&motor[DOUBLE].speed.speed_pid,0.03,0.00015,0,0,6500, 0, 250, 40 * 19, 30 * 19 * 2, 1350, SPEED);
+ //差速环，kp转向环（陀螺仪）
+// PIDInit(&speed_diff[DOUBLE].diff_pid,6,0,0,0,6500, 0, 250, 40 * 19, 30 * 19 * 2, 1350, SPEED);
+ Turn_Kp=5;
+ //pi速度环（陀螺仪）
+ PIDInit(&motor[DOUBLE].speed.speed_pid,0.03,0.00015,0,0,6500, 0, 250, 40 * 19, 30 * 19 * 2, 1350, SPEED);
+ //pid速度环（编码器）
  PIDInit(&motor[LEFT].speed.speed_pid,60,0.1,0.5,0,6500, 0, 250, 40 * 19, 30 * 19 * 2, 1350, SPEED);
  PIDInit(&motor[RIGHT].speed.speed_pid,60,0.1,0.5,0,6500, 0, 250, 40 * 19, 30 * 19 * 2, 1350, SPEED);
+ //pid位置环（编码器）
  PIDInit(&motor[LEFT].position.position_pid,420,0,600,0,6000, 0, 20, 3600, 30 * 19 * 4, 970, POSITION_360);
  PIDInit(&motor[RIGHT].position.position_pid,420,0,600,0,6000, 0, 20, 3600, 30 * 19 * 4, 970, POSITION_360);
   while(1) //实现比较值从0-300递增，到300后从300-0递减，循环

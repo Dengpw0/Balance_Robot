@@ -18,21 +18,18 @@
 //Copyright(C) 广州市星翼电子科技有限公司 2014-2024
 //All rights reserved									  
 ////////////////////////////////////////////////////////////////////////////////// 	 
-
+int Turn_PID(PidTypeDef *pid,int gyro_Z,int groz_med);
 //外部变量 extern说明改变量已在其它文件定义
 extern int   Encoder, CurrentPosition; //当前速度、当前位置
-extern int   TargetVelocity, CurrentPosition, EncoderLeft,EncoderRight,PWM_left,PWM_right;//目标速度、目标圈数、编码器读数、PWM控制变量
+extern int   TargetVelocity, CurrentPosition, EncoderLeft,EncoderRight,PWM_left,PWM_right,Turn_out;//目标速度、目标圈数、编码器读数、PWM控制变量
 extern int speedleft,speedright;
 extern float targetspeed;	//速度环期望（直立时为0.行走时给值）
-extern float Velcity_Kp,  Velcity_Ki,  Velcity_Kd; //相关速度PID参数
-extern float Position_Kp, Position_Ki, Position_Kd; //相关位置PID参数
-extern int   MortorRun;  //允许电机控制标志位
 
 extern float pitch,roll,yaw,pitch_med,groy_med,pitch_kalman; 		//欧拉角							//定义四个实际参数	欧拉角	一个pitch中值，负责平衡
 extern int pitchsee;
 extern short gyrox,gyroy,gyroz;	//陀螺仪原始数据			//定义三个实际参数	陀螺仪角度
 extern short aacx,aacy,aacz;		//加速度传感器原始数据	//定义三个实际参数	加速度
-
+extern int Turn_Kp,gyroz_med,gyroz_set;
 extern u16 flag;
 extern PidTypeDef position;
 extern PidTypeDef speed;
@@ -267,6 +264,13 @@ void PidCalc_Encode(PidTypeDef *pid, float left, float right, float targetspeed,
   
   pid->output = PWM_out;
 }
+int Turn_PID(PidTypeDef *pid,int gyro_Z,int groz_med)
+{
+	 int PWM_out;
+  
+  PWM_out = Turn_Kp*(gyro_Z-groz_med);
+  return PWM_out;
+}
 #define SPEED 0
 #define POSITION 1
 void TIM4_IRQHandler()
@@ -280,7 +284,7 @@ void TIM4_IRQHandler()
      MPU_Get_Accelerometer(&aacx,&aacy,&aacz); // 读取加速度
 		 pitch_kalman=KalmanFilter(&speedK,pitch);//请使用滤波后速度反馈值
 	   pitchsee = pitch_kalman * 100;
-		 //位置环
+		 //编码器位置环
 //		 motor[LEFT].position.PositionSet = 1;
 //		 motor[RIGHT].position.PositionSet = 2;
 //		
@@ -293,36 +297,39 @@ void TIM4_IRQHandler()
 //		 motor[LEFT].position.PWM = motor[LEFT].position.position_pid.output;
 //		 motor[RIGHT].position.PWM = motor[RIGHT].position.position_pid.output;
 		
-		//速度环
+		//编码器速度环
 //		 motor[LEFT].speed.SpeedSet = TargetVelocity;//motor[LEFT].position.PWM/76;	//
 //		 motor[RIGHT].speed.SpeedSet = TargetVelocity;//motor[RIGHT].position.PWM/76;	//
 		
-		 motor[LEFT].speed.SpeedNow = EncoderLeft*1000*200*0.000120830;
-		 motor[RIGHT].speed.SpeedNow = EncoderRight*1000*200*0.000120830;
+//		 motor[LEFT].speed.SpeedNow = EncoderLeft*1000*200*0.000120830;
+//		 motor[RIGHT].speed.SpeedNow = EncoderRight*1000*200*0.000120830;
 		 
 //		 motor[LEFT].speed.seeSpeedSet =  motor[LEFT].speed.SpeedSet;
 //		 motor[RIGHT].speed.seeSpeedSet =  motor[RIGHT].speed.SpeedSet;
 	 
 //		 PID_Calc(&motor[LEFT].speed.speed_pid,motor[LEFT].speed.SpeedNow,motor[LEFT].speed.SpeedSet);
 //		 PID_Calc(&motor[RIGHT].speed.speed_pid,motor[RIGHT].speed.SpeedNow,motor[RIGHT].speed.SpeedSet);
-		 PidCalc_Encode(&motor[DOUBLE].speed.speed_pid,EncoderLeft,EncoderRight,targetspeed,ENCODE_SPEED);
+		
 //		 motor[LEFT].speed.PWM = motor[DOUBLE].speed.speed_pid.output;
 //		 motor[RIGHT].speed.PWM = motor[LEFT].speed.PWM;
 		
 		
+		//速度环
+		 PidCalc_Encode(&motor[DOUBLE].speed.speed_pid,EncoderLeft,EncoderRight,targetspeed,ENCODE_SPEED);
 		//直立环
 		 PidCalc_IMU(&motor[LEFT].position.imu_pid,pitch_med+motor[DOUBLE].speed.speed_pid.output,pitch_kalman,gyroy,IMU_POSITION);
 		 PidCalc_IMU(&motor[RIGHT].position.imu_pid,pitch_med+motor[DOUBLE].speed.speed_pid.output,pitch_kalman,gyroy,IMU_POSITION);
 		 motor[LEFT].position.PWM = motor[LEFT].position.imu_pid.output;
 		 motor[RIGHT].position.PWM = motor[RIGHT].position.imu_pid.output;
+		 Turn_out=Turn_PID(&speed_diff[DOUBLE].diff_pid,gyroz,0);
 		 
 //		 //差速补偿，	。。不能加差速，直立环很南条
 //		 PID_Calc(&speed_diff[LEFT].diff_pid,motor[LEFT].position.PWM,motor[RIGHT].position.PWM);
 //		 PID_Calc(&speed_diff[RIGHT].diff_pid,motor[RIGHT].position.PWM,motor[LEFT].position.PWM);
 //		 speedleft = motor[LEFT].position.PWM+speed_diff[LEFT].diff_pid.output;
 //		 speedright = motor[RIGHT].position.PWM+speed_diff[RIGHT].diff_pid.output;
-		 speedleft = motor[LEFT].position.PWM;
-		 speedright = motor[RIGHT].position.PWM;
+		 speedleft = motor[LEFT].position.PWM-Turn_out;//负反馈	左-右正，令gyroz趋近0
+		 speedright = motor[RIGHT].position.PWM+Turn_out;//
 			 
 #if (SPEED)
 SetPWM(motor[LEFT].speed.PWM,motor[RIGHT].speed.PWM); //设置PWM
