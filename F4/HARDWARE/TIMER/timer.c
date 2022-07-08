@@ -5,6 +5,7 @@
 #include "mpu6050.h"
 #include "inv_mpu.h"
 #include "inv_mpu_dmp_motion_driver.h" 
+#include "kalman.h"
 //////////////////////////////////////////////////////////////////////////////////	 
 //本程序只供学习使用，未经作者许可，不得用于其它任何用途
 //ALIENTEK STM32F407开发板
@@ -27,7 +28,8 @@ extern float Velcity_Kp,  Velcity_Ki,  Velcity_Kd; //相关速度PID参数
 extern float Position_Kp, Position_Ki, Position_Kd; //相关位置PID参数
 extern int   MortorRun;  //允许电机控制标志位
 
-extern float pitch,roll,yaw,pitch_med; 		//欧拉角							//定义四个实际参数	欧拉角	一个pitch中值，负责平衡
+extern float pitch,roll,yaw,pitch_med,groy_med,pitch_kalman; 		//欧拉角							//定义四个实际参数	欧拉角	一个pitch中值，负责平衡
+extern int pitchsee;
 extern short gyrox,gyroy,gyroz;	//陀螺仪原始数据			//定义三个实际参数	陀螺仪角度
 extern short aacx,aacy,aacz;		//加速度传感器原始数据	//定义三个实际参数	加速度
 
@@ -41,7 +43,7 @@ extern PidTypeDef speed;
 void TIM2_PWM_Init(u32 arr,u32 psc)
 {		 					 
 	//此部分需手动修改IO口设置
-	NVIC_InitTypeDef NVIC_InitStructure;
+//	NVIC_InitTypeDef NVIC_InitStructure;
 	GPIO_InitTypeDef GPIO_InitStructure;
 	TIM_TimeBaseInitTypeDef  TIM_TimeBaseStructure;
 	TIM_OCInitTypeDef  TIM_OCInitStructure;
@@ -235,7 +237,7 @@ void EncoderRead_TIM1(u16 arr, u16 psc)
 void PidCalc(PidTypeDef *pid, float pitch, float gyroy)
 {
 	float PWM_out;
-  PWM_out = pid->Kp*(pitch-pitch_med)+pid->Kd*(gyroy-0);
+  PWM_out = pid->Kp*(pitch-pitch_med)+pid->Kd*(gyroy-groy_med);
 	pid->output = PWM_out;
 }
 #define SPEED 0
@@ -249,6 +251,8 @@ void TIM4_IRQHandler()
 		 mpu_dmp_get_data(&pitch,&roll,&yaw);	//得到数据时，return 0，跳出循环，如果没得到数据，一直循环，直到得到dmp计算出的数据
      MPU_Get_Gyroscope(&gyrox,&gyroy,&gyroz);  // 读取角速度
      MPU_Get_Accelerometer(&aacx,&aacy,&aacz); // 读取加速度
+		 pitch_kalman=KalmanFilter(&speedK,pitch);//请使用滤波后速度反馈值
+	   pitchsee = pitch_kalman * 100;
 		 //位置环
 //		 motor[LEFT].position.PositionSet = 1;
 //		 motor[RIGHT].position.PositionSet = 2;
@@ -279,8 +283,8 @@ void TIM4_IRQHandler()
 //		 motor[RIGHT].speed.PWM = motor[RIGHT].speed.speed_pid.output;
 		
 		//直立环
-		 PidCalc(&motor[LEFT].position.imu_pid,pitch,gyroy);
-		 PidCalc(&motor[RIGHT].position.imu_pid,pitch,gyroy);
+		 PidCalc(&motor[LEFT].position.imu_pid,pitch_kalman,gyroy);
+		 PidCalc(&motor[RIGHT].position.imu_pid,pitch_kalman,gyroy);
 		 motor[LEFT].position.PWM = motor[LEFT].position.imu_pid.output;
 		 motor[RIGHT].position.PWM = motor[RIGHT].position.imu_pid.output;
 		 

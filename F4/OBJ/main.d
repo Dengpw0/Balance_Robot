@@ -42,3 +42,4 @@
 ..\obj\main.o: ..\HARDWARE\MPU6050\mpuiic.h
 ..\obj\main.o: ..\HARDWARE\MPU6050\eMPL\inv_mpu.h
 ..\obj\main.o: ..\HARDWARE\MPU6050\eMPL\inv_mpu_dmp_motion_driver.h
+..\obj\main.o: ..\HARDWARE\KALMAN\kalman.h

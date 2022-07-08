@@ -8,19 +8,24 @@
 #include "mpu6050.h"
 #include "inv_mpu.h"
 #include "inv_mpu_dmp_motion_driver.h" 
-
+#include "kalman.h"
+//MOTOR
 int   TargetVelocity=100, EncoderLeft,EncoderRight,PWM_left,PWM_right;  //目标速度、目标圈数(位置)、编码器读数、PWM控制变量
 motor_control motor[2];
 speed_difference speed_diff[2];
-float pitch,roll,yaw; 		//欧拉角							//定义三个实际参数	欧拉角
+//MPU6050
+float pitch,roll,yaw,pitch_kalman; 		//欧拉角							//定义三个实际参数	欧拉角
 short aacx,aacy,aacz;		//加速度传感器原始数据	//定义三个实际参数	加速度
 short gyrox,gyroy,gyroz;	//陀螺仪原始数据			//定义三个实际参数	陀螺仪角度
-float pitch_med = -2.6;//-3.5;			//陀螺仪中值		-7是水平，却不是回中  -12 -3阈值		1.1-4.1
-
+float pitch_med = -3.5;//-3.5;			//陀螺仪中值		-7是水平，却不是回中  -12 -3阈值		1.1-4.1
+float groy_med = -37;
+int pitchsee;
+//my_value
 int seepitch;
 int Res;
 u8 usart_value;
 int speedleft,speedright;
+
 int main(void)
 { 
 	NVIC_PriorityGroupConfig(NVIC_PriorityGroup_2);//设置系统中断优先级分组2
@@ -33,6 +38,7 @@ int main(void)
   TIM3_Encode_Init();
 	TIM4_Encode_Init();
 	EncoderRead_TIM1(8399, 99);//此定时器影响iic时序
+	KalmanCreate(&speedK, 1, 50);	//Q R	
 		//跑一段但起不来
 //	PIDInit(&motor[LEFT].position.imu_pid,-800,0,-4,0,6000, 0, 20, 3600, 30 * 19 * 4, 970, POSITION_360);
 //	PIDInit(&motor[RIGHT].position.imu_pid,-800,0,-4,0,6000, 0, 20, 3600, 30 * 19 * 4, 970, POSITION_360);
@@ -69,9 +75,11 @@ int main(void)
 //效果不好
 // PIDInit(&motor[LEFT].position.imu_pid,-1000,0,-0.8,0,6000, 0, 20, 3600, 30 * 19 * 4, 970, POSITION_360);
 // PIDInit(&motor[RIGHT].position.imu_pid,-1000,0,-0.8,0,6000, 0, 20, 3600, 30 * 19 * 4, 970, POSITION_360);
-//先这样，但是pitch轴还会飘，有些超调，好很多
- PIDInit(&motor[LEFT].position.imu_pid,-2700,0,-5,0,6000, 0, 20, 3600, 30 * 19 * 4, 970, POSITION_360);
- PIDInit(&motor[RIGHT].position.imu_pid,-2700,0,-5,0,6000, 0, 20, 3600, 30 * 19 * 4, 970, POSITION_360);
+//不行
+// PIDInit(&motor[LEFT].position.imu_pid,-400,0,-0.5,0,6000, 0, 20, 3600, 30 * 19 * 4, 970, POSITION_360);
+// PIDInit(&motor[RIGHT].position.imu_pid,-400,0,-0.5,0,6000, 0, 20, 3600, 30 * 19 * 4, 970, POSITION_360);
+ PIDInit(&motor[LEFT].position.imu_pid,-4000,0,-6.6,0,6000, 0, 20, 3600, 30 * 19 * 4, 970, POSITION_360);
+ PIDInit(&motor[RIGHT].position.imu_pid,-4000,0,-6.6,0,6000, 0, 20, 3600, 30 * 19 * 4, 970, POSITION_360);
  PIDInit(&speed_diff[LEFT].diff_pid,0,0,0,0,6500, 0, 250, 40 * 19, 30 * 19 * 2, 1350, SPEED);
  PIDInit(&speed_diff[RIGHT].diff_pid,0,0,0,0,6500, 0, 250, 40 * 19, 30 * 19 * 2, 1350, SPEED);
  
@@ -81,5 +89,8 @@ int main(void)
  PIDInit(&motor[RIGHT].position.position_pid,420,0,600,0,6000, 0, 20, 3600, 30 * 19 * 4, 970, POSITION_360);
   while(1) //实现比较值从0-300递增，到300后从300-0递减，循环
 	{
+		SEGGER_RTT_printf(0,"pitch_kalman %d\r\n",pitch_kalman);
+//					if((lastspeed-viewspeed)>50||(lastspeed-viewspeed)<-50)
+//					SEGGER_RTT_printf(0,"times %d\r\n",times++);
 	}
 }
